@@ -48,7 +48,7 @@ public class UserController {
             users.put(user.getId(), user);
             log.info("User with id={} updated.", user.getId());
         } else {
-            throw new NotFoundException("User with id[" + user.getId() + "] not found.");
+            throw new NotFoundException("User update unknown");
         }
         return user;
     }
