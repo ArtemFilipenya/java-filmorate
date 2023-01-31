@@ -8,16 +8,16 @@ import java.time.LocalDate;
 public class UserValidator {
     public static void validate(User user) throws ValidateException {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
-            throw new ValidateException("User create Fail email");
+            throw new ValidateException("User create Fail email.");
         }
         if (!user.getEmail().contains("@")) {
-            throw new ValidateException("User create Fail email");
+            throw new ValidateException("User create Fail email. The mail must contain '@'.");
         }
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
-            throw new ValidateException("User create Fail login");
+            throw new ValidateException("User create Fail login. The Login cannot be empty.");
         }
         if (LocalDate.parse(user.getBirthday()).isAfter(LocalDate.now())) {
-            throw new ValidateException("User create Fail birthday");
+            throw new ValidateException("User create Fail birthday.");
         }
         if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
             user.setName(user.getLogin());
