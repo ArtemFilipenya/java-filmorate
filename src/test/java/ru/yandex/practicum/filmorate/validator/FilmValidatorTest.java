@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FilmValidatorTest {
     private static final int ID = 123;
-    private static final String NAME = "MyName";
+    private static final String NAME = "name";
     private static final String DESCRIPTION = "my description";
     private static final String RELEASE_DATE = "1999-01-01";
     private static final int DURATION = 150;

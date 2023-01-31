@@ -9,7 +9,7 @@ public class FilmValidator {
     private static final LocalDate CINEMA_BIRTHDAY = LocalDate.of(1895, 12, 28);
 
     public static void validate(Film film) throws ValidateException {
-        if (film.getName().isBlank() || film.getName().isEmpty()) {
+        if (film.getName().isBlank() || film.getName() == null) {
             throw new ValidateException("The film cannot be empty.");
         }
         if (film.getDescription().length() > 200) {
