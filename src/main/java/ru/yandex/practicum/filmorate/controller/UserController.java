@@ -53,25 +53,21 @@ public class UserController {
         return user;
     }
 
-    @ExceptionHandler(ValidateException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ResponseEntity<String> handleValidationException(
-            ValidateException exception
-    ) {
-        log.error(exception.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(exception.getMessage());
-    }
-
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleNotFoundException(
-            NotFoundException exception
-    ) {
-        log.error(exception.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(exception.getMessage());
-    }
+//    @ExceptionHandler(ValidateException.class)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ResponseEntity<String> handleValidationException(ValidateException exception) {
+//        log.error(exception.getMessage());
+//        return ResponseEntity
+//                .status(HttpStatus.BAD_REQUEST)
+//                .body(exception.getMessage());
+//    }
+//
+//    @ExceptionHandler(NotFoundException.class)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    public ResponseEntity<String> handleNotFoundException(NotFoundException exception) {
+//        log.error(exception.getMessage());
+//        return ResponseEntity
+//                .status(HttpStatus.NOT_FOUND)
+//                .body(exception.getMessage());
+//    }
 }

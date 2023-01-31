@@ -7,6 +7,9 @@ import java.time.LocalDate;
 
 public class UserValidator {
     public static void validate(User user) throws ValidateException {
+        if (user.getName() == null || user.getName().isBlank()) {
+            throw new ValidateException("User create Fail email");
+        }
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             throw new ValidateException("User create Fail email");
         }
