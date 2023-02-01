@@ -16,27 +16,28 @@ class FilmValidatorTest {
     private static final String RELEASE_DATE = "1999-01-01";
     private static final int DURATION = 150;
     private static final String BLANK_STR = "   ";
+    private final FilmValidator filmValidator = new FilmValidator();
 
     private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
     @Test
-    void validateFilmDataIsValid() throws ValidateException {
+    void validateFilmDataIsValid() {
         Film film = new Film(ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION);
-        FilmValidator.validate(film);
+        filmValidator.validate(film);
     }
 
     @Test
     void validateNameIsEmptyIsNotValid() {
         Film film = new Film(ID, "", DESCRIPTION, RELEASE_DATE, DURATION);
 
-        assertThrows(ValidateException.class, () -> FilmValidator.validate(film));
+        assertThrows(ValidateException.class, () -> filmValidator.validate(film));
     }
 
     @Test
     void validateNameIsBlankIsNotValid() {
         Film film = new Film(ID, BLANK_STR, DESCRIPTION, RELEASE_DATE, DURATION);
 
-        assertThrows(ValidateException.class, () -> FilmValidator.validate(film));
+        assertThrows(ValidateException.class, () -> filmValidator.validate(film));
     }
 
     @Test
@@ -50,7 +51,7 @@ class FilmValidatorTest {
                 "Не дождавшись хозяина, Хатико продолжает приходить на станцию, не пропуская ни дня.";
         Film film = new Film(ID, BLANK_STR, longDescription, RELEASE_DATE, DURATION);
 
-        assertThrows(ValidateException.class, () -> FilmValidator.validate(film));
+        assertThrows(ValidateException.class, () -> filmValidator.validate(film));
     }
 
     @Test
@@ -58,20 +59,20 @@ class FilmValidatorTest {
         String releaseDate = CINEMA_BIRTH.minusDays(1).format(DateTimeFormatter.ISO_DATE);
         Film film = new Film(ID, BLANK_STR, DESCRIPTION, releaseDate, DURATION);
 
-        assertThrows(ValidateException.class, () -> FilmValidator.validate(film));
+        assertThrows(ValidateException.class, () -> filmValidator.validate(film));
     }
 
     @Test
     void validateDurationIsNegativeIsNotValid() {
         Film film = new Film(ID, BLANK_STR, DESCRIPTION, RELEASE_DATE, -100);
 
-        assertThrows(ValidateException.class, () -> FilmValidator.validate(film));
+        assertThrows(ValidateException.class, () -> filmValidator.validate(film));
     }
 
     @Test
     void validateDurationIsZeroIsNotValid() {
         Film film = new Film(ID, BLANK_STR, DESCRIPTION, RELEASE_DATE, 0);
 
-        assertThrows(ValidateException.class, () -> FilmValidator.validate(film));
+        assertThrows(ValidateException.class, () -> filmValidator.validate(film));
     }
 }
