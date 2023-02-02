@@ -21,7 +21,7 @@ class FilmValidatorTest {
     private static final LocalDate CINEMA_BIRTH = LocalDate.of(1895, 12, 28);
 
     @Test
-    void validateFilmDataIsValid() {
+    void validateShouldNotThrowExceptionIfDataIsValid() {
         Film film = new Film(ID, NAME, DESCRIPTION, RELEASE_DATE, DURATION);
         filmValidator.validate(film);
     }
@@ -41,7 +41,7 @@ class FilmValidatorTest {
     }
 
     @Test
-    void validateDescriptionIsLongerThan200IsNotValid() {
+    void validateShouldThrowExceptionIfDescriptionIsLongerThan200IsNotValid() {
         String longDescription = "Профессор университета Паркер Уилсон находит на вокзале потерявшегося щенка, " +
                 "отправленного из Японии в Америку. Так как за ним никто не является, Паркеру приходится оставить щенка " +
                 "у себя. За то время, что собака живёт у профессора, между ними возникает крепкая дружба. " +

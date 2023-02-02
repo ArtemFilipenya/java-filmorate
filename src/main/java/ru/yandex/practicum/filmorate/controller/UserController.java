@@ -44,12 +44,11 @@ public class UserController {
     public User update(@RequestBody User user) {
         userValidator.validate(user);
         checkUserName(user);
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("User with id={} updated.", user.getId());
-        } else {
+        if (!users.containsKey(user.getId())) {
             throw new NotFoundException("User with this id does not exist.");
         }
+        users.put(user.getId(), user);
+        log.info("User with id={} updated.", user.getId());
         return user;
     }
 

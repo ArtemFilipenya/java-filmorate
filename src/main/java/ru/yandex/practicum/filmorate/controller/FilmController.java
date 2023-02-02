@@ -42,12 +42,11 @@ public class FilmController {
     @PutMapping
     public Film updateFilm(@RequestBody Film film) {
         filmValidator.validate(film);
-        if (films.containsKey(film.getId())) {
-            films.put(film.getId(), film);
-            log.info("Film with id={} updated.", film.getId());
-        } else {
+        if (!films.containsKey(film.getId())) {
             throw new NotFoundException("Film with id[" + film.getId() + "] not found.");
         }
+        films.put(film.getId(), film);
+        log.info("Film with id={} updated.", film.getId());
         return film;
     }
 }
