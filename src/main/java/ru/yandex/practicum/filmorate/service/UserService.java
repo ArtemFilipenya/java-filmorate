@@ -36,6 +36,7 @@ public class UserService {
     }
 
     public User updateUser(User user) {
+        checkUserName(user);
         userValidator.validate(user);
         return userStorage.updateUser(user);
     }
@@ -73,8 +74,8 @@ public class UserService {
         User user = userStorage.getUserById(userId);
         List<User> friends = new ArrayList<>();
 
-        for (Integer friendId: user.getFriends()) {
-            friends.add(userStorage.getUserById(friendId));
+        for (Integer friend: user.getFriends()) {
+            friends.add(userStorage.getUserById(friend));
         }
         return friends;
     }

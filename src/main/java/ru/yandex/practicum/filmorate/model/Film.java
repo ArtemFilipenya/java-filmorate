@@ -3,8 +3,8 @@ package ru.yandex.practicum.filmorate.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -14,7 +14,7 @@ public class Film {
     private String description;
     private String releaseDate;
     private int duration;
-    private final Set<Integer> likes = new HashSet<>();
+    private final List<Integer> likes = new ArrayList<>();
 
     public void addLike(int userId) {
         likes.add(userId);

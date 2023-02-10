@@ -25,7 +25,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film getFilmById(int id) {
         Film film = films.get(id);
 
-        if (!films.containsValue(film)) {
+        if (!films.containsKey(id)) {
             throw new NotFoundException(String.format("Film with id=[%d] not found.", id));
         }
         return film;
@@ -33,7 +33,7 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film update(Film film) {
-        if (!films.containsValue(film)) {
+        if (!films.containsKey(film.getId())) {
             throw new NotFoundException(String.format("Film with id=[%d] not found.", film.getId()));
         }
         films.put(film.getId(), film);
@@ -43,8 +43,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addNewFilm(Film film) {
-        film.setId(currentId++);
-        films.put(film.getId(), film);
+        film.setId(currentId);
+        films.put(currentId, film);
+        ++currentId;
         log.info(String.format("Film with id=[%d] has been created.", film.getId()));
         return film;
     }

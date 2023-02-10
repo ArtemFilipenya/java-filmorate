@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final static int TOP = 10;
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final FilmValidator filmValidator;
 
     public List<Film> getAllFilms() {
@@ -54,18 +57,17 @@ public class FilmService {
 
     public void deleteLike(int filmId, int userId) {
         Film film = filmStorage.getFilmById(filmId);
+        userStorage.getUserById(userId);
 
         film.deleteLike(userId);
         filmStorage.update(film);
         log.info(String.format("User with id=[%d] deleted like of the film with id=[%d]", userId, filmId));
     }
 
-    public List<Film> getTop(int count) {
-        if (count == 0) {
-            count = TOP;
-        }
+    public List<Film> getTop() {
         List<Film> films = filmStorage.getAllFilms();
+
         films.sort(Comparator.comparingInt(Film::countLikes).reversed());
-        return films.stream().limit(count).collect(Collectors.toList());
+        return films.stream().limit(TOP).collect(Collectors.toList());
     }
 }
