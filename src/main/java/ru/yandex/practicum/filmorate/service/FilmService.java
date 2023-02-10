@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
@@ -51,12 +53,15 @@ public class FilmService {
             log.info(String.format("User with id=[%d] added like to film with id=[%d]", userId, filmId));
     }
 
-    public void deleteLike(int filmId, int userId) {
+    public Film deleteLike(int filmId, int userId) {
         Film film = filmStorage.getFilmById(filmId);
+        boolean result = film.deleteLike(userId);
 
-        film.deleteLike(userId);
-        filmStorage.update(film);
+        if (!result) {
+            throw new NotFoundException(String.format("User didn't like film with id=[%d].", filmId));
+        }
         log.info(String.format("User with id=[%d] deleted like of the film with id=[%d]", userId, filmId));
+        return filmStorage.update(film);
     }
 
     public List<Film> getTop(int count) {
