@@ -43,11 +43,17 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film addNewFilm(Film film) {
-        return null;
+        film.setId(currentId++);
+        films.put(film.getId(), film);
+        log.info(String.format("Film with id=[%d] has been created.", film.getId()));
+        return film;
     }
 
     @Override
-    public void deleteFilm(Film Film) {
-
+    public void deleteFilm(Film film) {
+        if (!films.containsValue(film)) {
+            throw new NotFoundException(String.format("Film with id=[%d] not found.", film.getId()));
+        }
+        films.remove(film.getId());
     }
 }
