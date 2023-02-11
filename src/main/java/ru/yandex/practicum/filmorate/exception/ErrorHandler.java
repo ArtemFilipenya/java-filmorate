@@ -11,13 +11,19 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ValidateException handleValidationException(ValidateException e) {
-        return new ValidateException(e.getMessage());
+    public void handleValidationException(ValidateException e) {
+        log.error(e.getMessage(), e);
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public NotFoundException handleNotFoundException(NotFoundException e) {
-        return new NotFoundException(e.getMessage());
+    public void handleNotFoundException(NotFoundException e) {
+        log.error(e.getMessage(), e);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public void handleException(Throwable e) {
+        log.error(e.getMessage(), e);
     }
 }

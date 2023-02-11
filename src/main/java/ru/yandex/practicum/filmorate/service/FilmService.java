@@ -32,7 +32,9 @@ public class FilmService {
 
     public Film addNewFilm(Film film) {
         filmValidator.validate(film);
-        return filmStorage.addNewFilm(film);
+        filmStorage.addNewFilm(film);
+        log.info(String.format("Film with id=[%d] has been created.", film.getId()));
+        return film;
     }
 
     public void deleteFilm(Film film) {
@@ -41,8 +43,9 @@ public class FilmService {
 
     public Film updateFilm(Film film) {
         filmValidator.validate(film);
-
-        return filmStorage.update(film);
+        filmStorage.update(film);
+        log.info(String.format("Film with id=[%d] has been updated.", film.getId()));
+        return film;
     }
 
     public void addLike (int filmId, int userId) {
@@ -68,9 +71,10 @@ public class FilmService {
         List<Film> films = filmStorage.getAllFilms();
 
         if (count <= 0) {
-            count = TOP;
+            throw new ValidateException("Count cannot be less 0.");
         }
-        films.sort(Comparator.comparingInt(Film::countLikes).reversed());
-        return films.stream().limit(count).collect(Collectors.toList());
+        return films.stream().sorted(Comparator.comparingInt(Film::countLikes).reversed())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 }

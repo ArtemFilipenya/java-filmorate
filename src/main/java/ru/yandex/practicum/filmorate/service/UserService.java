@@ -28,17 +28,22 @@ public class UserService {
     public User addNewUser(User user) {
         userValidator.validate(user);
         checkUserName(user);
-        return userStorage.addNewUser(user);
+        userStorage.addNewUser(user);
+        log.info(String.format("User with id=[%d] has been created.", user.getId()));
+        return user;
     }
 
     public void deleteUser(User user) {
         userStorage.deleteUser(user);
+        log.info(String.format("User with id=[%d] has been deleted.", user.getId()));
     }
 
     public User updateUser(User user) {
         checkUserName(user);
         userValidator.validate(user);
-        return userStorage.updateUser(user);
+        userStorage.updateUser(user);
+        log.info(String.format("User with id=[%d] has been updated.", user.getId()));
+        return user;
     }
 
     public void addNewFriend(int userId, int friendId) {

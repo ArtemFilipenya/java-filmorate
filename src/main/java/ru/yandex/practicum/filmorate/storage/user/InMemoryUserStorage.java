@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -11,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-@Slf4j
 public class InMemoryUserStorage implements UserStorage{
     private int currentId = 1;
     private final Map<Integer, User> users = new HashMap<>();
@@ -37,7 +35,6 @@ public class InMemoryUserStorage implements UserStorage{
             throw new NotFoundException(String.format("User with id=[%d] not found.", user.getId()));
         }
         users.put(user.getId(), user);
-        log.info(String.format("User with id=[%d] has been updated.", user.getId()));
         return user;
     }
 
@@ -46,7 +43,6 @@ public class InMemoryUserStorage implements UserStorage{
         user.setId(currentId);
         users.put(currentId, user);
         ++currentId;
-        log.info(String.format("User with id=[%d] has been created.", user.getId()));
         return user;
     }
 
@@ -56,6 +52,5 @@ public class InMemoryUserStorage implements UserStorage{
             throw new NotFoundException(String.format("User with id=[%d] not found.", user.getId()));
         }
         users.remove(user.getId());
-        log.info(String.format("User with id=[%d] has been deleted.", user.getId()));
     }
 }
