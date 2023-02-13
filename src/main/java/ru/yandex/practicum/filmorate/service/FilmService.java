@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class FilmService {
-    private final static int TOP = 10;
     private final FilmStorage filmStorage;
     private final FilmValidator filmValidator;
 
@@ -73,7 +72,8 @@ public class FilmService {
         if (count <= 0) {
             throw new ValidateException("Count cannot be less 0.");
         }
-        return films.stream().sorted(Comparator.comparingInt(Film::countLikes).reversed())
+        return films.stream()
+                .sorted(Comparator.comparingInt(Film::countLikes).reversed())
                 .limit(count)
                 .collect(Collectors.toList());
     }

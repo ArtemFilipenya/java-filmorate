@@ -65,8 +65,8 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int userId, int friendId) {
-        List<Integer> commonFriendsId = new ArrayList<>(getAllFriendsId(userId));
-        commonFriendsId.retainAll(getAllFriendsId(friendId));
+        List<Integer> commonFriendsId = new ArrayList<>(getAllFriendIds(userId));
+        commonFriendsId.retainAll(getAllFriendIds(friendId));
         List<User> commonFriends = new ArrayList<>();
 
         for (Integer id: commonFriendsId) {
@@ -85,7 +85,7 @@ public class UserService {
         return friends;
     }
 
-    public List<Integer> getAllFriendsId(int userId) {
+    private List<Integer> getAllFriendIds(int userId) {
         User user = userStorage.getUserById(userId);
 
         return new ArrayList<>(user.getAllFriends());
