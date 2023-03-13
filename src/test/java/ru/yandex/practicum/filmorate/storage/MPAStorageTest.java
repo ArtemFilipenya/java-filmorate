@@ -23,7 +23,7 @@ public class MPAStorageTest {
 
     @Test
     void getByIdValidIdValidMPA() {
-        Optional<MPA> mpaOptional = Optional.ofNullable(mpaStorage.getById(1));
+        Optional<MPA> mpaOptional = Optional.ofNullable(mpaStorage.getById(1L));
         assertThat(mpaOptional)
                 .isPresent()
                 .hasValueSatisfying(mpa ->
@@ -33,7 +33,7 @@ public class MPAStorageTest {
 
     @Test
     void getByIdNotValidIdEmpty() {
-        assertThrows(NotFoundException.class, () -> mpaStorage.getById(10));
+        assertThrows(NotFoundException.class, () -> mpaStorage.getById(10L));
     }
 
     @Test

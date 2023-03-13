@@ -17,7 +17,7 @@ public class MPAService {
         return mpaStorage.getAll();
     }
 
-    public MPA getById(Integer id) throws NotFoundException {
+    public MPA getById(Long id) {
         return mpaStorage.getById(id);
     }
 }

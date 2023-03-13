@@ -9,6 +9,6 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @SuperBuilder
 public class MPA {
-    private Integer id;
+    private Long id;
     private String name;
 }

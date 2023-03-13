@@ -75,7 +75,7 @@ public class DBFilmStorage implements FilmStorage {
             statement.setString(2, film.getDescription());
             statement.setDate(3, Date.valueOf(film.getReleaseDate()));
             statement.setInt(4, film.getDuration());
-            statement.setInt(5, film.getMpa().getId());
+            statement.setLong(5, film.getMpa().getId());
             return statement;
         }, keyHolder);
 
@@ -156,7 +156,7 @@ public class DBFilmStorage implements FilmStorage {
         int duration = rs.getInt("duration");
         List<Genre> genres = genreService.getByFilmId(id);
         MPA mpa = new MPA(
-                rs.getInt("mpa_id"),
+                rs.getLong("mpa_id"),
                 rs.getString("mpa_name")
         );
         return new Film(id, name, description, releaseDate, duration, genres, mpa);

@@ -28,7 +28,7 @@ public class FilmStorageTest {
                 .description("my description")
                 .duration(150)
                 .releaseDate("1999-01-01")
-                .mpa(MPA.builder().id(1).build())
+                .mpa(MPA.builder().id(1L).build())
                 .build();
         int filmId = filmStorage.addNewFilm(testFilm).getId();
 

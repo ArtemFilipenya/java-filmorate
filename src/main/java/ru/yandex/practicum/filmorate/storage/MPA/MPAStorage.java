@@ -8,5 +8,5 @@ import java.util.List;
 public interface MPAStorage {
     List<MPA> getAll();
 
-    MPA getById(Integer id) throws NotFoundException;
+    MPA getById(Long id) throws NotFoundException;
 }

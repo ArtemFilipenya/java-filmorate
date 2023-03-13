@@ -28,7 +28,7 @@ public class DBMPAStorage implements MPAStorage {
     }
 
     @Override
-    public MPA getById(Integer id) throws NotFoundException {
+    public MPA getById(Long id) throws NotFoundException {
         String sqlQuery =
                 "SELECT m.id, " +
                         "m.name " +
@@ -41,7 +41,7 @@ public class DBMPAStorage implements MPAStorage {
     }
 
     private MPA makeMPA(ResultSet rs) throws SQLException {
-        Integer id = rs.getInt("id");
+        Long id = rs.getLong("id");
         String name = rs.getString("name");
         return new MPA(id, name);
     }
