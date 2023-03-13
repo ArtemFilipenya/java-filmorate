@@ -53,4 +53,24 @@ public class InMemoryFilmStorage implements FilmStorage {
         }
         films.remove(film.getId());
     }
+
+    @Override
+    public void addLike(Integer id, Integer userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void removeLike(Integer id, Integer userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean hasLikeFromUser(Integer id, Integer userId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public List<Film> getTop(Integer count) {
+        return new ArrayList<>();
+    }
 }
