@@ -24,6 +24,9 @@ public class UserService {
     }
 
     public User addUser(User user) throws ResponseStatusException {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         userValidator.validate(user);
         users.add(user);
         log.info("Пользователь {} сохранен", user);
@@ -31,6 +34,9 @@ public class UserService {
     }
 
     public User updateUser(User user) throws ResponseStatusException {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
         userValidator.validate(user);
         users.update(user);
         log.info("Пользователь {} сохранен", user);
@@ -77,11 +83,9 @@ public class UserService {
     }
 
     public List<User> getFriends(Integer friendId) throws ResponseStatusException {
-
         if (friendId <=0 ) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
         }
-
         return users.getFriends(friendId);
     }
 

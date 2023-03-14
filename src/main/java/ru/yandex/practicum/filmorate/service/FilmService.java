@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage films;
     private final FilmValidator filmValidator = new FilmValidator();
-    private final LocalDate minDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
