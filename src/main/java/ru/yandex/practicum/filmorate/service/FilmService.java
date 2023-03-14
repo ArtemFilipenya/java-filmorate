@@ -83,7 +83,7 @@ public class FilmService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Film getFilm(Integer filmId) {
+    public Film getFilm(Integer filmId) throws ResponseStatusException {
         if (filmId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "id не может быть отрицательным либо равен 0");

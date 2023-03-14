@@ -28,7 +28,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Genre getGenre(Integer id)  {
+    public Genre getGenre(Integer id)  throws EmptyResultDataAccessException {
         Genre genre;
         String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
         try {

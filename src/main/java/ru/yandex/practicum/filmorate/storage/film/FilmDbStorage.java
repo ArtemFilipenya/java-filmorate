@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.pool.TypePool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -51,7 +52,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update (Film film) {
+    public Film update (Film film) throws ResponseStatusException {
         String sqlQuery = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
         if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
@@ -79,7 +80,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     @Override
-    public Film getFilm(Integer id) {
+    public Film getFilm(Integer id) throws ResponseStatusException{
         String sqlQuery = "SELECT film_id, name, description, release_date, duration, film.mpa, mpa.mpa_name " +
                 "FROM film JOIN MPA ON film.mpa = mpa.mpa_id WHERE film.film_id = ?";
         Film film;
@@ -92,7 +93,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Integer userId, Integer filmId) throws  ResponseStatusException {
+    public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса добавления лайка фильму." +
                     " Невозможно поставить лайк от пользователя с id= " + userId + " которого не существует.";
@@ -114,7 +115,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteLike(Integer userId, Integer filmId) {
+    public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
             String message = "Ошибка запроса удаления лайка" +
                     " Невозможно удалить лайк от пользователя с id= " + userId + " которого не существует.";
@@ -169,7 +170,7 @@ public class FilmDbStorage implements FilmStorage {
         return new TreeSet<>(jdbcTemplate.query(sqlQuery, this::makeGenre, id));
     }
 
-    private boolean dbContainsFilm(Film film) {
+    private boolean dbContainsFilm(Film film) throws EmptyResultDataAccessException {
         String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
                 "WHERE f.name = ? AND  f.description = ? AND f.release_date = ? AND f.duration = ? AND f.mpa = ?";
         try {
@@ -181,7 +182,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private boolean dbContainsUser(Integer userId) {
+    private boolean dbContainsUser(Integer userId) throws EmptyResultDataAccessException {
         String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
         try {
             jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
@@ -191,7 +192,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private boolean dbContainsFilm(Integer filmId) {
+    private boolean dbContainsFilm(Integer filmId) throws EmptyResultDataAccessException {
         String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
                 "WHERE f.film_id = ?";
         try {

@@ -28,7 +28,7 @@ public class MpaDbStorage implements MpaStorage{
     }
 
     @Override
-    public Mpa getMpa(Integer id) {
+    public Mpa getMpa(Integer id) throws EmptyResultDataAccessException {
         Mpa mpa;
         String sqlQuery = "SELECT * FROM mpa WHERE mpa_id = ?";
         try {
