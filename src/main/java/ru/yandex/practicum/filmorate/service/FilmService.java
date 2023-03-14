@@ -22,7 +22,6 @@ public class FilmService {
     private final LocalDate minDate = LocalDate.of(1895, 12, 28);
 
     @Autowired
-
     public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
         this.films = films;
     }
