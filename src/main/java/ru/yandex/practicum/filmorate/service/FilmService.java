@@ -1,80 +1,94 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidateException;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class FilmService {
-    private final FilmStorage filmStorage;
-    private final FilmValidator filmValidator;
+    private final FilmStorage films;
+    private final LocalDate minDate = LocalDate.of(1895, 12, 28);
 
-    public List<Film> getAllFilms() {
-        return new ArrayList<>(filmStorage.getAllFilms());
+    @Autowired
+
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
+        this.films = films;
     }
 
-    public Film getFilmById(int filmId) {
-        return filmStorage.getFilmById(filmId);
-    }
-
-    public Film addNewFilm(Film film) {
-        filmValidator.validate(film);
-        filmStorage.addNewFilm(film);
-        log.info(String.format("Film with id=[%d] has been created.", film.getId()));
-        return film;
-    }
-
-    public void deleteFilm(Film film) {
-        filmStorage.deleteFilm(film);
-    }
-
-    public Film updateFilm(Film film) {
-        filmValidator.validate(film);
-        filmStorage.update(film);
-        log.info(String.format("Film with id=[%d] has been updated.", film.getId()));
-        return film;
-    }
-
-    public void addLike (int filmId, int userId) {
-            Film film = filmStorage.getFilmById(filmId);
-
-            film.addLike(userId);
-            filmStorage.update(film);
-            log.info(String.format("User with id=[%d] added like to film with id=[%d]", userId, filmId));
-    }
-
-    public Film deleteLike(int filmId, int userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        boolean result = film.deleteLike(userId);
-
-        if (!result) {
-            throw new NotFoundException(String.format("User didn't like film with id=[%d].", filmId));
+    public Film addFilm(Film film) throws ResponseStatusException {
+        if (film.getReleaseDate().isBefore(minDate)) {
+            log.warn("Дата релиза не может быть раньше 28.12.1895\nТекущая дата релиза: " + film.getReleaseDate());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата релиза не может быть раньше 28.12.1895");
         }
-        log.info(String.format("User with id=[%d] deleted like of the film with id=[%d]", userId, filmId));
-        return filmStorage.update(film);
+        films.add(film);
+        log.info("Фильм {} сохранен", film);
+        return film;
     }
 
-    public List<Film> getTop(int count) {
-        List<Film> films = filmStorage.getAllFilms();
+    public Film updateFilm(Film film) throws ResponseStatusException {
+        if (film.getReleaseDate().isBefore(minDate)) {
+            log.warn("Дата релиза не может быть раньше 28.12.1895\nТекущая дата релиза: " + film.getReleaseDate());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Дата релиза не может быть раньше 28.12.1895");
+        }
+        log.info("Фильм {} обновлен", film);
+        return films.update(film);
+    }
 
+    public List<Film> getFilms() {
+        log.info("Текущее кол-во фильмов: " + films.getFilmsList().size());
+        return films.getFilmsList();
+    }
+
+    public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и filmId не могут быть отрицательныи либо равены 0");
+        }
+        films.addLike(userId, filmId);
+        log.info("Пользователь c id = " + userId + " поставил лайк фильму c id = " + filmId);
+    }
+
+    public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id и filmId не могут быть отрицательныи либо равены 0");
+        }
+        films.deleteLike(userId, filmId);
+        log.info("Пользователь c id=" + userId + " удалил лайк с фильма id= " + filmId);
+    }
+
+    public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
         if (count <= 0) {
-            throw new ValidateException("Count cannot be less 0.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "count не может быть отрицательным либо равен 0");
         }
-        return films.stream()
-                .sorted(Comparator.comparingInt(Film::countLikes).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        Comparator<Film> sortFilm = (f1, f2) -> {
+            Integer filmLikes1 = f1.getLikes().size();
+            Integer filmLikes2 = f2.getLikes().size();
+            return -1 * filmLikes1.compareTo(filmLikes2);
+
+        };
+        return films.getFilmsList().stream().sorted(sortFilm).limit(count)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public Film getFilm(Integer filmId) {
+        if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id не может быть отрицательным либо равен 0");
+        }
+        return films.getFilm(filmId);
     }
 }
