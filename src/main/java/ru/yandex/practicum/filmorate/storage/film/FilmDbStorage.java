@@ -58,7 +58,7 @@ public class FilmDbStorage implements FilmStorage {
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
         if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
                 , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
-            throw new ValidateException("Not found th film");
+            throw new ValidateException(HttpStatus.NOT_FOUND, "Not found th film");
         }
         if (film.getGenres().size() == 0) {
             String sqlQuery2 = "DELETE FROM genre_films WHERE film_id = ?";

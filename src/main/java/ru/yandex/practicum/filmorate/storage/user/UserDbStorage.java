@@ -3,16 +3,17 @@ package ru.yandex.practicum.filmorate.storage.user;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -41,13 +42,14 @@ public class UserDbStorage implements UserStorage {
 
     public void delete(User user) {
     }
+
     @Override
-    public void update(User user) throws NotFoundException {
+    public void update(User user) throws ValidateException {
         String sqlQuery = "UPDATE person " +
                 "SET email = ?, login = ?, name = ?, birthday = ? WHERE person_id = ?";
         if (jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName()
                 , user.getBirthday(), user.getId()) == 0) {
-            throw new NotFoundException("User not found.");
+            throw new ValidateException(HttpStatus.NOT_FOUND, "Bad user update");
         }
     }
 
@@ -58,18 +60,18 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) throws ResponseStatusException {
+    public void addFriend(Integer userId, Integer friendId) throws ValidateException {
         if (!dbContainsUser(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Add friend error");
+            throw new ValidateException(HttpStatus.NOT_FOUND, "Add friend error");
         }
         if (!dbContainsUser(friendId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Add friend error");
+            throw new ValidateException(HttpStatus.NOT_FOUND, "Add friend error");
         }
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, friendId);
         } catch (DataIntegrityViolationException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "friend request error");
+            throw new ValidateException(HttpStatus.BAD_REQUEST, "friend request error");
         }
     }
 
