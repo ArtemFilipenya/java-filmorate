@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
@@ -41,12 +42,12 @@ public class UserDbStorage implements UserStorage {
     public void delete(User user) {
     }
     @Override
-    public void update(User user) throws ResponseStatusException {
+    public void update(User user) throws NotFoundException {
         String sqlQuery = "UPDATE person " +
                 "SET email = ?, login = ?, name = ?, birthday = ? WHERE person_id = ?";
         if (jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName()
                 , user.getBirthday(), user.getId()) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id=" + user.getId() + " not found.");
+            throw new NotFoundException("User not found.");
         }
     }
 

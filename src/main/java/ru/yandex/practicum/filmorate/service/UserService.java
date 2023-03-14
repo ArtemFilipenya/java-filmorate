@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
@@ -48,51 +49,46 @@ public class UserService {
         return users.getUsersList();
     }
 
-    public void addFriend(Integer userId, Integer friendId) throws ResponseStatusException {
+    public void addFriend(Integer userId, Integer friendId) throws ValidateException {
         if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и friendId не могут быть отрицательныи либо равены 0");
+            throw new ValidateException("id and friendId cannot be less 0");
         }
         users.addFriend(userId, friendId);
-        log.info("Пользователь с id=" + userId + " добавил в друзья пользователя с id= " + friendId);
     }
 
-    public void deleteFriend(Integer userId, Integer friendId) throws ResponseStatusException {
+    public void deleteFriend(Integer userId, Integer friendId) throws ValidateException {
         if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и friendId не могут быть отрицательныи либо равены 0");
+            throw new ValidateException("id and friendId cannot be less 0");
         }
         if (userId.equals(friendId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Невозможно удалить из друзей самого себя");
+                    "You cant delete yourself");
         }
         users.deleteFriend(userId, friendId);
-        log.info("Пользователь с id=" + userId + " удалил пользователя с id=" + friendId);
     }
 
-    public List<User> getCommonFriends(Integer userId, Integer friendId) throws ResponseStatusException {
+    public List<User> getCommonFriends(Integer userId, Integer friendId) throws ValidateException {
         if (userId <=0 || friendId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id и friendId не могут быть отрицательныи либо равены 0");
+                    "id and friendId cannot be less 0");
         }
         if (userId.equals(friendId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Невозможно запросить общих друзей самого себя");
+                    "Unable to request mutual friends of self");
         }
         return  users.getCommonFriends(userId, friendId);
     }
 
-    public List<User> getFriends(Integer friendId) throws ResponseStatusException {
+    public List<User> getFriends(Integer friendId) throws ValidateException {
         if (friendId <=0 ) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id не может быть отрицательным либо равен 0");
+            throw new ValidateException("id and friendId cannot be less 0");
         }
         return users.getFriends(friendId);
     }
 
     public User getUser(Integer userId) {
         if (userId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id не может быть отрицательным либо равен 0");
+            throw new ValidateException("id and friendId cannot be less 0");
         }
         return users.getUser(userId);
     }
