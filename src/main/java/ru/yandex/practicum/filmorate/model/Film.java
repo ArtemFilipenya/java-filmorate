@@ -4,11 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PastOrPresent;
-import javax.validation.constraints.Positive;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,13 +17,9 @@ import java.util.TreeSet;
 public class Film {
     @EqualsAndHashCode.Exclude
     private Integer id;
-    @NotBlank(message = "Name cannot be empty")
     private String name;
-    @Size(max = 200, message = "Max length 200")
     private String description;
-    @PastOrPresent(message = "Bad release date")
     private LocalDate releaseDate;
-    @Positive(message = "Bad duration")
     private Integer duration;
     @EqualsAndHashCode.Exclude
     private final Set<User> likes = new HashSet<>();

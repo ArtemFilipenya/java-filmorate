@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @Slf4j
 public class UserService {
     private final UserStorage users;
+    private final UserValidator userValidator = new UserValidator();
 
     @Autowired
     public UserService(@Qualifier("UserDbStorage") UserStorage users) {
@@ -22,20 +24,14 @@ public class UserService {
     }
 
     public User addUser(User user) throws ResponseStatusException {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.debug("Имя пользователя пустое. Был использован логин");
-        }
+        userValidator.validate(user);
         users.add(user);
         log.info("Пользователь {} сохранен", user);
         return user;
     }
 
     public User updateUser(User user) throws ResponseStatusException {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            log.debug("Имя пользователя пустое. Был использован логин");
-        }
+        userValidator.validate(user);
         users.update(user);
         log.info("Пользователь {} сохранен", user);
         return user;

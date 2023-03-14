@@ -18,12 +18,9 @@ import java.util.Set;
 public class User {
     @EqualsAndHashCode.Exclude
     private Integer id;
-    @Email(message = "bad email")
     private String email;
-    @NotBlank(message = "Login cannot be empty or null")
     private String login;
     private String name;
-    @Past(message = "Birthday cannot be int the future")
     private LocalDate birthday;
     private final Set<User> friends = new HashSet<>();
 
