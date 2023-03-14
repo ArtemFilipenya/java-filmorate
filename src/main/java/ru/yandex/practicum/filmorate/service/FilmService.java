@@ -1,9 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
@@ -15,66 +18,68 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class FilmService {
-    private final FilmStorage filmStorage;
-    private final FilmValidator filmValidator;
+    private final FilmStorage films;
+    private final FilmValidator filmValidator = new FilmValidator();
 
-    public List<Film> getAllFilms() {
-        return new ArrayList<>(filmStorage.getAllFilms());
+    @Autowired
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
+        this.films = films;
     }
 
-    public Film getFilmById(int filmId) {
-        return filmStorage.getFilmById(filmId);
-    }
-
-    public Film addNewFilm(Film film) {
+    public Film addFilm(Film film) throws ResponseStatusException {
         filmValidator.validate(film);
-        filmStorage.addNewFilm(film);
-        log.info(String.format("Film with id=[%d] has been created.", film.getId()));
+        films.add(film);
+        log.info("film was {} saved", film);
         return film;
     }
 
-    public void deleteFilm(Film film) {
-        filmStorage.deleteFilm(film);
-    }
-
-    public Film updateFilm(Film film) {
+    public Film updateFilm(Film film) throws ValidateException {
         filmValidator.validate(film);
-        filmStorage.update(film);
-        log.info(String.format("Film with id=[%d] has been updated.", film.getId()));
-        return film;
+        return films.update(film);
     }
 
-    public void addLike (int filmId, int userId) {
-            Film film = filmStorage.getFilmById(filmId);
-
-            film.addLike(userId);
-            filmStorage.update(film);
-            log.info(String.format("User with id=[%d] added like to film with id=[%d]", userId, filmId));
+    public List<Film> getFilms() {
+        log.info("films count: " + films.getFilmsList().size());
+        return films.getFilmsList();
     }
 
-    public Film deleteLike(int filmId, int userId) {
-        Film film = filmStorage.getFilmById(filmId);
-        boolean result = film.deleteLike(userId);
-
-        if (!result) {
-            throw new NotFoundException(String.format("User didn't like film with id=[%d].", filmId));
+    public void addLike(Integer userId, Integer filmId) throws ValidateException {
+        if (userId <=0 || filmId <= 0) {
+            throw new ValidateException("id and friendId cannot be less 0");
         }
-        log.info(String.format("User with id=[%d] deleted like of the film with id=[%d]", userId, filmId));
-        return filmStorage.update(film);
+        films.addLike(userId, filmId);
     }
 
-    public List<Film> getTop(int count) {
-        List<Film> films = filmStorage.getAllFilms();
+    public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
+        if (userId <=0 || filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id and friendId cannot be less 0");
+        }
+        films.deleteLike(userId, filmId);
+    }
 
+    public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
         if (count <= 0) {
-            throw new ValidateException("Count cannot be less 0.");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "count cannot be less 0");
         }
-        return films.stream()
-                .sorted(Comparator.comparingInt(Film::countLikes).reversed())
-                .limit(count)
-                .collect(Collectors.toList());
+        Comparator<Film> sortFilm = (f1, f2) -> {
+            Integer filmLikes1 = f1.getLikes().size();
+            Integer filmLikes2 = f2.getLikes().size();
+            return -1 * filmLikes1.compareTo(filmLikes2);
+
+        };
+        return films.getFilmsList().stream().sorted(sortFilm).limit(count)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    public Film getFilm(Integer filmId) throws ResponseStatusException {
+        if (filmId <= 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "id and friendId cannot be less 0");
+        }
+        return films.getFilm(filmId);
     }
 }

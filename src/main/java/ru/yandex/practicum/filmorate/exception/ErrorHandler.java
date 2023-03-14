@@ -1,32 +1,34 @@
 package ru.yandex.practicum.filmorate.exception;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
-@RestControllerAdvice
-@Slf4j
+@RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 public class ErrorHandler {
-    @ExceptionHandler(ValidateException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(ValidateException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(400, "Bad request", e.getMessage());
+
+    @ExceptionHandler(ResponseStatusException.class)
+    private ResponseEntity<String> handleException(ResponseStatusException e) {
+        return ResponseEntity
+                .status(e.getStatus())
+                .body(e.getMessage());
     }
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(404, "Not Found", e.getMessage());
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    private ResponseEntity<String> handleException(MethodArgumentNotValidException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(HttpStatus.BAD_REQUEST + " " + e.getFieldError().getDefaultMessage());
     }
 
-    @ExceptionHandler(Throwable.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleException(Throwable e) {
-        log.error(e.getMessage(), e);
-        return new ErrorResponse(500, "Internal server error", e.getMessage());
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    private ResponseEntity<String> handleException(MethodArgumentTypeMismatchException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(HttpStatus.BAD_REQUEST + " bad string parameters " + e.getName() + "=" + e.getValue());
     }
 }
