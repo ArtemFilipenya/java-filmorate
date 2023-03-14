@@ -70,7 +70,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, friendId);
-        } catch (DataIntegrityViolationException e) {
+        } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "friend request error");
         }
     }
