@@ -44,12 +44,12 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void update(User user) throws ValidateException {
+    public void update(User user) throws ResponseStatusException {
         String sqlQuery = "UPDATE person " +
                 "SET email = ?, login = ?, name = ?, birthday = ? WHERE person_id = ?";
         if (jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName()
                 , user.getBirthday(), user.getId()) == 0) {
-            throw new ValidateException(HttpStatus.NOT_FOUND, "Bad user update");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Bad user update");
         }
     }
 
@@ -60,18 +60,18 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) throws ValidateException {
+    public void addFriend(Integer userId, Integer friendId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
-            throw new ValidateException(HttpStatus.NOT_FOUND, "Add friend error");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Add friend error");
         }
         if (!dbContainsUser(friendId)) {
-            throw new ValidateException(HttpStatus.NOT_FOUND, "Add friend error");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Add friend error");
         }
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, friendId);
         } catch (DataIntegrityViolationException e) {
-            throw new ValidateException(HttpStatus.BAD_REQUEST, "friend request error");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "friend request error");
         }
     }
 

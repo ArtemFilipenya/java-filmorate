@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.pool.TypePool;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -53,12 +54,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update (Film film) throws ValidateException {
+    public Film update (Film film) throws ResponseStatusException {
         String sqlQuery = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
         if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
                 , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
-            throw new ValidateException(HttpStatus.NOT_FOUND, "Not found th film");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found the film");
         }
         if (film.getGenres().size() == 0) {
             String sqlQuery2 = "DELETE FROM genre_films WHERE film_id = ?";
