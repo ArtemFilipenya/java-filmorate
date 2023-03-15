@@ -2,6 +2,8 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -58,17 +60,17 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(Integer userId, Integer friendId) throws NotFoundException, ResponseStatusException {
-        if (!dbContainsUser(userId)) {
-            throw new NotFoundException("Add friend error");
-        }
-        if (!dbContainsUser(friendId)) {
-            throw new NotFoundException("Add friend error");
-        }
+        dbContainsUser(userId);
+        dbContainsUser(friendId);
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, friendId);
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "friend request error");
+        } catch (DuplicateKeyException e) {
+            String message = "Unable to add to friends a user who is already friends";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+        } catch (DataIntegrityViolationException e) {
+            String message = "Unable to add friends to myself";
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
         }
     }
 
@@ -165,13 +167,13 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private boolean dbContainsUser(Integer userId) throws EmptyResultDataAccessException {
+    private boolean dbContainsUser(Integer userId) throws NotFoundException {
         String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
         try {
             jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
             return true;
         } catch (EmptyResultDataAccessException e) {
-            return false;
+            throw new NotFoundException("User not found");
         }
     }
 }
