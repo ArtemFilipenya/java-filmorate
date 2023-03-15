@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -49,9 +50,9 @@ public class UserService {
         return users.getUsersList();
     }
 
-    public void addFriend(Integer userId, Integer friendId) throws ValidateException {
+    public void addFriend(Integer userId, Integer friendId) throws NotFoundException {
         if (userId <=0 || friendId <= 0) {
-            throw new ValidateException("id and friendId cannot be less 0");
+            throw new NotFoundException("id and friendId cannot be less 0");
         }
         users.addFriend(userId, friendId);
     }
@@ -61,20 +62,17 @@ public class UserService {
             throw new ValidateException("id and friendId cannot be less 0");
         }
         if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "You cant delete yourself");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cant delete yourself");
         }
         users.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) throws ValidateException {
         if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id and friendId cannot be less 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id and friendId cannot be less 0");
         }
         if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Unable to request mutual friends of self");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to request mutual friends of self");
         }
         return  users.getCommonFriends(userId, friendId);
     }
