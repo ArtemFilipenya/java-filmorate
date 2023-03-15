@@ -10,12 +10,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice("ru.yandex.practicum.filmorate.controller")
 public class ErrorHandler {
-
     @ExceptionHandler(ResponseStatusException.class)
     private ResponseEntity<String> handleException(ResponseStatusException e) {
         return ResponseEntity
                 .status(e.getStatus())
-                .body(e.getMessage());
+                .body(e.getMessage() + " " + e.getResponseHeaders());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
