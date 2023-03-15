@@ -29,8 +29,13 @@ public class FilmService {
             throw new NotFoundException("This movie already exists.");
         }
         filmValidator.validate(film);
+<<<<<<< HEAD
         filmStorage.add(film);
         log.info("film was {} saved", film);
+=======
+        films.add(film);
+        log.info("film {} saved", film);
+>>>>>>> 8a7ce8c (v5.0)
         return film;
     }
 

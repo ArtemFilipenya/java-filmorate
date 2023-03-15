@@ -33,7 +33,11 @@ public class GenreDbStorage implements GenreStorage {
         try {
             genre = jdbcTemplate.queryForObject(sqlQueryToGetGenreById, this::makeGenre, id);
         } catch (EmptyResultDataAccessException e) {
+<<<<<<< HEAD:src/main/java/ru/yandex/practicum/filmorate/storage/GenreDbStorage.java
             throw new NotFoundException("Cannot find the Genre");
+=======
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There is no such genre.");
+>>>>>>> 8a7ce8c (v5.0):src/main/java/ru/yandex/practicum/filmorate/storage/genre/GenreDbStorage.java
         }
         return genre;
     }
