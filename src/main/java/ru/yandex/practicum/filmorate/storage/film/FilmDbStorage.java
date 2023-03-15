@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -54,12 +55,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update (Film film) throws ResponseStatusException {
+    public Film update (Film film) throws NotFoundException {
         String sqlQuery = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
         if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
                 , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Not found the film");
+            throw new NotFoundException("Not found the film");
         }
         if (film.getGenres().size() == 0) {
             String sqlQuery2 = "DELETE FROM genre_films WHERE film_id = ?";
