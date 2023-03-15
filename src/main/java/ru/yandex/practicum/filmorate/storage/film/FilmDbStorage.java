@@ -1,8 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.pool.TypePool;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -12,7 +10,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -37,8 +34,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void add(Film film) throws ResponseStatusException {
         if (dbContainsFilm(film)) {
-            log.warn("Такой фильм уже есть");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой фильм уже есть");
+            log.warn("This movie already exists.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This movie already exists.");
         }
         Integer filmId = addFilmInfo(film);
         film.setId(filmId);
@@ -98,21 +95,18 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
-            String message = "Ошибка запроса добавления лайка фильму." +
-                    " Невозможно поставить лайк от пользователя с id= " + userId + " которого не существует.";
+            String message = "You can't like a user that doesn't exist.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         if (!dbContainsFilm(filmId)) {
-            String message = "Ошибка запроса добавления лайка фильму." +
-                    " Невозможно поставить лайк фильму с id= " + filmId + " которого не существует.";
+            String message = "You can't like a user that doesn't exist.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, filmId);
         } catch (DuplicateKeyException e ) {
-            String message = "Ошибка запроса добавления лайка фильму." +
-                    " Попытка полькователем поставить лайк дважды одному фильму.";
+            String message = "An attempt by a user to like the same movie twice.";
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
         }
     }
@@ -120,19 +114,16 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (!dbContainsUser(userId)) {
-            String message = "Ошибка запроса удаления лайка" +
-                    " Невозможно удалить лайк от пользователя с id= " + userId + " которого не существует.";
+            String message = "You can't delete like a user that doesn't exist.";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         if (!dbContainsFilm(filmId)) {
-            String message = "Ошибка запроса удаления лайка" +
-                    " Невозможно удалить лайк с фильма с id= " + filmId + " которого не существует.";
+            String message = "Unable to remove like from a movie that doesn't exist";
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
         }
         String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
         if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Лайка от пользователя с id=" + userId + " у фильма с id=" + filmId + " нет");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no like");
         }
     }
 
