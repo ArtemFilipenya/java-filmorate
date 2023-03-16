@@ -31,7 +31,7 @@ public class FilmService {
     public Film addFilm(Film film) throws ResponseStatusException {
         filmValidator.validate(film);
         films.add(film);
-        log.info("film {} saved", film);
+        log.info("film was {} saved", film);
         return film;
     }
 

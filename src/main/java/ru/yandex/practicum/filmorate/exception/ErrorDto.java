@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.exception;
 
-public class ErrorDto {
+public class ErrorDTO {
     public String status;
     public String message;
     public String time;

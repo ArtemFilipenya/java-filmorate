@@ -25,39 +25,39 @@ public class UserService {
         this.users = users;
     }
 
-    public User addUser(User user) {
+    public User addUser(User user) throws ResponseStatusException {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
         users.add(user);
-        log.info("User {} saved", user);
+        log.info("Пользователь {} сохранен", user);
         return user;
     }
 
-    public User updateUser(User user) {
+    public User updateUser(User user) throws ResponseStatusException {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
         users.update(user);
-        log.info("User {} saved", user);
+        log.info("Пользователь {} сохранен", user);
         return user;
     }
 
     public List<User> getUsers() {
-        log.info("User count: " + users.getUsersList().size());
+        log.info("Текущее кол-во пользователей: " + users.getUsersList().size());
         return users.getUsersList();
     }
 
-    public void addFriend(Integer userId, Integer friendId) {
+    public void addFriend(Integer userId, Integer friendId) throws NotFoundException {
         if (userId <=0 || friendId <= 0) {
             throw new NotFoundException("id and friendId cannot be less 0");
         }
         users.addFriend(userId, friendId);
     }
 
-    public void deleteFriend(Integer userId, Integer friendId) {
+    public void deleteFriend(Integer userId, Integer friendId) throws ValidateException {
         if (userId <=0 || friendId <= 0) {
             throw new ValidateException("id and friendId cannot be less 0");
         }
@@ -67,7 +67,7 @@ public class UserService {
         users.deleteFriend(userId, friendId);
     }
 
-    public List<User> getCommonFriends(Integer userId, Integer friendId) {
+    public List<User> getCommonFriends(Integer userId, Integer friendId) throws ValidateException {
         if (userId <=0 || friendId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id and friendId cannot be less 0");
         }
@@ -77,7 +77,7 @@ public class UserService {
         return  users.getCommonFriends(userId, friendId);
     }
 
-    public List<User> getFriends(Integer friendId) {
+    public List<User> getFriends(Integer friendId) throws ValidateException {
         if (friendId <=0 ) {
             throw new ValidateException("id and friendId cannot be less 0");
         }
