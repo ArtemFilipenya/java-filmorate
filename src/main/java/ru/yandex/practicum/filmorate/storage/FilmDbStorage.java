@@ -38,8 +38,7 @@ public class FilmDbStorage implements FilmStorage {
             for (Genre genre : film.getGenres()) {
                 jdbcTemplate.update(sqlQuery,
                         filmId,
-                        genre.getId()
-                );
+                        genre.getId());
             }
         }
     }
@@ -70,7 +69,6 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
-
 
     @Override
     public Film getFilm(Integer id) {

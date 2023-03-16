@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
@@ -19,49 +18,49 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService {
-    private final FilmStorage filmStorage;
+    private final FilmStorage films;
     private final FilmValidator filmValidator = new FilmValidator();
 
     @Autowired
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage filmStorage) {
-        this.filmStorage = filmStorage;
+    public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
+        this.films = films;
     }
 
     public Film addFilm(Film film) throws ResponseStatusException {
         filmValidator.validate(film);
-        filmStorage.add(film);
-        log.info("film {} saved", film);
+        films.add(film);
+        log.info("Film {} saved", film);
         return film;
     }
 
-    public Film updateFilm(Film film) throws ValidateException {
+    public Film updateFilm(Film film) throws ResponseStatusException {
         filmValidator.validate(film);
-        return filmStorage.update(film);
+        log.info("Film {} update", film);
+        return films.update(film);
     }
 
     public List<Film> getFilms() {
-        log.info("films count: " + filmStorage.getFilms().size());
-        return filmStorage.getFilms();
+        log.info("Текущее кол-во фильмов: " + films.getFilms().size());
+        return films.getFilms();
     }
 
-    public void addLike(Integer userId, Integer filmId) throws ValidateException {
-        if (userId <=0 || filmId <= 0) {
-            throw new ValidateException("id and friendId cannot be less 0");
-        }
-        filmStorage.addLike(userId, filmId);
+    public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
+        films.addLike(userId, filmId);
     }
 
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (userId <=0 || filmId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id and friendId cannot be less 0");
+                    "id и filmId не могут быть отрицательныи либо равены 0");
         }
-        filmStorage.deleteLike(userId, filmId);
+        films.deleteLike(userId, filmId);
+        log.info("Пользователь c id=" + userId + " удалил лайк с фильма id= " + filmId);
     }
 
     public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
         if (count <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "count cannot be less 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "count не может быть отрицательным либо равен 0");
         }
         Comparator<Film> sortFilm = (f1, f2) -> {
             Integer filmLikes1 = f1.getLikes().size();
@@ -69,17 +68,15 @@ public class FilmService {
             return -1 * filmLikes1.compareTo(filmLikes2);
 
         };
-        return filmStorage.getFilms().stream()
-                .sorted(sortFilm)
-                .limit(count)
+        return films.getFilms().stream().sorted(sortFilm).limit(count)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Film getFilm(Integer filmId) throws ResponseStatusException {
+    public Film getFilm(Integer filmId) {
         if (filmId <= 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id and friendId cannot be less 0");
+                    "id не может быть отрицательным либо равен 0");
         }
-        return filmStorage.getFilm(filmId);
+        return films.getFilm(filmId);
     }
 }
