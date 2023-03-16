@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.mpa;
+package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;

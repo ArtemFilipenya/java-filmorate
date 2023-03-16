@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 @Data
 @Builder
@@ -23,7 +22,7 @@ public class Film {
     @EqualsAndHashCode.Exclude
     private final Set<User> likes = new HashSet<>();
     @EqualsAndHashCode.Exclude
-    private final Set<Genre> genres = new TreeSet<>();
+    private final Set<Genre> genres = new HashSet<>();
     @EqualsAndHashCode.Exclude
     private Mpa mpa;
 
