@@ -23,7 +23,7 @@ public class FilmService {
     private final FilmValidator filmValidator = new FilmValidator();
 
     @Autowired
-    public FilmService(@Qualifier("FilmDbStorage") FilmStorage films) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage films) {
         this.films = films;
     }
 
