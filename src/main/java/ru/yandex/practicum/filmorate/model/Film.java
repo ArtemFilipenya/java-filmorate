@@ -4,13 +4,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 @Data
 @Builder
@@ -24,9 +22,8 @@ public class Film {
     @EqualsAndHashCode.Exclude
     private final Set<User> likes = new HashSet<>();
     @EqualsAndHashCode.Exclude
-    private final Set<Genre> genres = new TreeSet<>();
+    private final Set<Genre> genres = new HashSet<>();
     @EqualsAndHashCode.Exclude
-    @NotNull
     private Mpa mpa;
 
     public Map<String, Object> toMap() {

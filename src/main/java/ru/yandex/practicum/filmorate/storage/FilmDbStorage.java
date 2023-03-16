@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage.film;
+package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +33,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void add(Film film) throws ResponseStatusException {
-        if (dbContainsFilm(film)) {
-            log.warn("This movie already exists.");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This movie already exists.");
-        }
         Integer filmId = addFilmInfo(film);
         film.setId(filmId);
         String sqlQuery = "INSERT into genre_films (film_id, genre_id) "
@@ -73,11 +69,10 @@ public class FilmDbStorage implements FilmStorage {
         return film2;
     }
 
-    public List<Film> getFilmsList() {
+    public List<Film> getFilms() {
         String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
-
 
     @Override
     public Film getFilm(Integer id) throws ResponseStatusException{
