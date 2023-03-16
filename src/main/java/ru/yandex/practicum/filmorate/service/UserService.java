@@ -31,7 +31,7 @@ public class UserService {
         }
         userValidator.validate(user);
         users.add(user);
-        log.info("Пользователь {} сохранен", user);
+        log.info("User {} saved", user);
         return user;
     }
 
@@ -41,53 +41,53 @@ public class UserService {
         }
         userValidator.validate(user);
         users.update(user);
-        log.info("Пользователь {} сохранен", user);
+        log.info("User {} saved", user);
         return user;
     }
 
     public List<User> getUsers() {
-        log.info("Текущее кол-во пользователей: " + users.getUsersList().size());
+        log.info("Users count: " + users.getUsersList().size());
         return users.getUsersList();
     }
 
     public void addFriend(Integer userId, Integer friendId) throws NotFoundException {
-        if (userId <=0 || friendId <= 0) {
-            throw new NotFoundException("id and friendId cannot be less 0");
-        }
+//        if (userId <=0 || friendId <= 0) {
+//            throw new NotFoundException("id and friendId cannot be less 0");
+//        }
         users.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) throws ValidateException {
-        if (userId <=0 || friendId <= 0) {
-            throw new ValidateException("id and friendId cannot be less 0");
-        }
-        if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cant delete yourself");
-        }
+//        if (userId <=0 || friendId <= 0) {
+//            throw new ValidateException("id and friendId cannot be less 0");
+//        }
+//        if (userId.equals(friendId)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cant delete yourself");
+//        }
         users.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) throws ValidateException {
-        if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id and friendId cannot be less 0");
-        }
-        if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to request mutual friends of self");
-        }
+//        if (userId <=0 || friendId <= 0) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id and friendId cannot be less 0");
+//        }
+//        if (userId.equals(friendId)) {
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to request mutual friends of self");
+//        }
         return  users.getCommonFriends(userId, friendId);
     }
 
     public List<User> getFriends(Integer friendId) throws ValidateException {
-        if (friendId <=0 ) {
-            throw new ValidateException("id and friendId cannot be less 0");
-        }
+//        if (friendId <=0 ) {
+//            throw new ValidateException("id and friendId cannot be less 0");
+//        }
         return users.getFriends(friendId);
     }
 
     public User getUser(Integer userId) {
-        if (userId <= 0) {
-            throw new ValidateException("id and friendId cannot be less 0");
-        }
+//        if (userId <= 0) {
+//            throw new ValidateException("id and friendId cannot be less 0");
+//        }
         return users.getUser(userId);
     }
 }
