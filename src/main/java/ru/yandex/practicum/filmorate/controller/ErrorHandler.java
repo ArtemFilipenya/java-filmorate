@@ -31,14 +31,12 @@ public class ErrorHandler {
         errorDTO.setStatus(String.valueOf(e.getStatus().value()));
         errorDTO.setTime(new Date().toString());
         log.error(e.getMessage(), e);
-
         return new ResponseEntity<>(errorDTO, e.getStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<String> handleException(MethodArgumentNotValidException e) {
         log.error(e.getMessage(), e);
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(HttpStatus.BAD_REQUEST + " " + e.getFieldError().getDefaultMessage());
@@ -47,7 +45,6 @@ public class ErrorHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<String> handleException(MethodArgumentTypeMismatchException e) {
         log.error(e.getMessage(), e);
-
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(HttpStatus.BAD_REQUEST + " bad string parameters " + e.getName() + "=" + e.getValue());

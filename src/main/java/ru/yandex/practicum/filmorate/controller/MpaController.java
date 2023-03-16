@@ -21,8 +21,8 @@ public class MpaController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<Mpa> getMpas() {
-        return mpaService.getMpas();
+    public List<Mpa> getMpasList() {
+        return mpaService.getMpasList();
     }
 
     @GetMapping("{id}")

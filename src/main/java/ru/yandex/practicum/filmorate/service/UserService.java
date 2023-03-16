@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
 import java.util.List;
@@ -17,12 +17,12 @@ import java.util.List;
 @Service
 @Slf4j
 public class UserService {
-    private final UserStorage userStorage;
+    private final UserStorage users;
     private final UserValidator userValidator = new UserValidator();
 
     @Autowired
-    public UserService(@Qualifier("UserDbStorage") UserStorage userStorage) {
-        this.userStorage = userStorage;
+    public UserService(@Qualifier("UserDbStorage") UserStorage users) {
+        this.users = users;
     }
 
     public User addUser(User user) {
@@ -30,7 +30,7 @@ public class UserService {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
-        userStorage.add(user);
+        users.add(user);
         log.info("User {} saved", user);
         return user;
     }
@@ -40,21 +40,21 @@ public class UserService {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
-        userStorage.update(user);
+        users.update(user);
         log.info("User {} saved", user);
         return user;
     }
 
     public List<User> getUsers() {
-        log.info("User count: " + userStorage.getUsersList().size());
-        return userStorage.getUsersList();
+        log.info("User count: " + users.getUsersList().size());
+        return users.getUsersList();
     }
 
     public void addFriend(Integer userId, Integer friendId) {
-//        if (userId <=0 || friendId <= 0) {
-//            throw new NotFoundException("id and friendId cannot be less 0");
-//        }
-        userStorage.addFriend(userId, friendId);
+        if (userId <=0 || friendId <= 0) {
+            throw new NotFoundException("id and friendId cannot be less 0");
+        }
+        users.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
@@ -64,7 +64,7 @@ public class UserService {
         if (userId.equals(friendId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cant delete yourself");
         }
-        userStorage.deleteFriend(userId, friendId);
+        users.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) {
@@ -74,20 +74,20 @@ public class UserService {
         if (userId.equals(friendId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to request mutual friends of self");
         }
-        return  userStorage.getCommonFriends(userId, friendId);
+        return  users.getCommonFriends(userId, friendId);
     }
 
     public List<User> getFriends(Integer friendId) {
         if (friendId <=0 ) {
             throw new ValidateException("id and friendId cannot be less 0");
         }
-        return userStorage.getFriends(friendId);
+        return users.getFriends(friendId);
     }
 
     public User getUser(Integer userId) {
         if (userId <= 0) {
             throw new ValidateException("id and friendId cannot be less 0");
         }
-        return userStorage.getUser(userId);
+        return users.getUser(userId);
     }
 }
