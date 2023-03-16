@@ -33,10 +33,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void add(Film film) throws ResponseStatusException {
-        if (dbContainsFilm(film)) {
-            log.warn("Такой фильм уже есть");
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой фильм уже есть");
-        }
         Integer filmId = addFilmInfo(film);
         film.setId(filmId);
         String sqlQuery = "INSERT into genre_films (film_id, genre_id) "
@@ -94,16 +90,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
-        if (!dbContainsUser(userId)) {
-            String message = "Ошибка запроса добавления лайка фильму." +
-                    " Невозможно поставить лайк от пользователя с id= " + userId + " которого не существует.";
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
-        }
-        if (!dbContainsFilm(filmId)) {
-            String message = "Ошибка запроса добавления лайка фильму." +
-                    " Невозможно поставить лайк фильму с id= " + filmId + " которого не существует.";
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
-        }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, filmId);
@@ -116,16 +102,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
-        if (!dbContainsUser(userId)) {
-            String message = "Ошибка запроса удаления лайка" +
-                    " Невозможно удалить лайк от пользователя с id= " + userId + " которого не существует.";
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
-        }
-        if (!dbContainsFilm(filmId)) {
-            String message = "Ошибка запроса удаления лайка" +
-                    " Невозможно удалить лайк с фильма с id= " + filmId + " которого не существует.";
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, message);
-        }
         String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
         if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
