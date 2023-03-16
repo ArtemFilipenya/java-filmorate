@@ -20,9 +20,8 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
-@Repository("FilmDbStorage")
+@Repository("filmDbStorage")
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -35,15 +34,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void add(Film film) throws ResponseStatusException {
         Integer filmId = addFilmInfo(film);
-        String sqlQuery = "INSERT into genre_films (film_id, genre_id) "
-                + " VALUES (?, ?)";
-        if (film.getGenres() != null) {
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(sqlQuery,
-                        filmId,
-                        genre.getId()
-                );
-            }
+        film.setId(filmId); // Да, имеет
+        String sqlQuery = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
+
+        for (Genre genre : film.getGenres()) {
+            jdbcTemplate.update(sqlQuery, filmId, genre.getId());
         }
     }
 

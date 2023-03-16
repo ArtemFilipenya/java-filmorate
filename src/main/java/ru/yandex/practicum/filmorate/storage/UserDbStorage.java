@@ -17,7 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Repository("UserDbStorage")
+@Repository("userDbStorage")
 @Slf4j
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -29,10 +29,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void add(User user) throws ResponseStatusException {
-        if (dbContainsUser(user)) {
-            log.warn(String.format("User=[%s] already exists.", user));
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой пользователь уже есть");
-        }
         Integer userId = addUserInfo(user);
         user.setId(userId);
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
@@ -46,8 +42,8 @@ public class UserDbStorage implements UserStorage {
     public void update(User user) throws NotFoundException {
         String sqlQuery = "UPDATE person " +
                 "SET email = ?, login = ?, name = ?, birthday = ? WHERE person_id = ?";
-        if (jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName()
-                , user.getBirthday(), user.getId()) == 0) {
+        if (jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),
+                user.getBirthday(), user.getId()) == 0) {
             throw new NotFoundException("Bad user update");
         }
     }
@@ -76,12 +72,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void deleteFriend(Integer userId, Integer friendId) throws ResponseStatusException {
-        if (!dbContainsUser(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unfriend error");
-        }
-        if (!dbContainsUser(friendId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unfriend error");
-        }
         String sqlQuery = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
         if (jdbcTemplate.update(sqlQuery, userId, friendId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No like from user");
@@ -90,14 +80,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getCommonFriends(Integer userId, Integer friendId) throws ResponseStatusException {
-        if (!dbContainsUser(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You cant get the list of friends " +
-                    "of a non-existent user");
-        }
-        if (!dbContainsUser(friendId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "You cant get the list of friends " +
-                    "of a non-existent user");
-        }
         String sqlQuery = "SELECT * " +
                 "FROM person " +
                 "WHERE person_id IN " +
@@ -109,9 +91,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public List<User> getFriends(Integer friendId) throws ResponseStatusException {
-        if (!dbContainsUser(friendId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "The user not found");
-        }
         String sqlQuery = "SELECT * FROM person " +
                 "WHERE person_id IN (SELECT addressee_id FROM friend_request WHERE sender_id = ?)";
         return jdbcTemplate.query(sqlQuery, this::makeFriendUser, friendId);
@@ -119,9 +98,6 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User getUser(Integer userId) throws ResponseStatusException {
-        if (!dbContainsUser(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id= " + userId + " not found");
-        }
         String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
         return jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
     }
@@ -154,17 +130,6 @@ public class UserDbStorage implements UserStorage {
                 .name(resultSet.getString("name"))
                 .birthday(resultSet.getDate("birthday").toLocalDate())
                 .build();
-    }
-
-    private boolean dbContainsUser(User user) throws EmptyResultDataAccessException {
-        String sqlQuery = "SELECT * FROM person WHERE email = ? AND login = ? AND name = ? AND birthday = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeUser, user.getEmail(), user.getLogin(),
-                    user.getName(), user.getBirthday());
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
     }
 
     private boolean dbContainsUser(Integer userId) throws NotFoundException {
