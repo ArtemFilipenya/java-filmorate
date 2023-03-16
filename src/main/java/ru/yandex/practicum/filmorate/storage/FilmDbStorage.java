@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,7 +35,6 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void add(Film film) throws ResponseStatusException {
         Integer filmId = addFilmInfo(film);
-        film.setId(filmId);
         String sqlQuery = "INSERT into genre_films (film_id, genre_id) "
                 + " VALUES (?, ?)";
         if (film.getGenres() != null) {
@@ -83,7 +83,7 @@ public class FilmDbStorage implements FilmStorage {
         try {
             film = jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, id);
         } catch (EmptyResultDataAccessException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Фильма с id=" + id + " нет");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "there is no movie with this id");
         }
         return film;
     }
@@ -94,9 +94,7 @@ public class FilmDbStorage implements FilmStorage {
         try {
             jdbcTemplate.update(sqlQuery, userId, filmId);
         } catch (DuplicateKeyException e ) {
-            String message = "Ошибка запроса добавления лайка фильму." +
-                    " Попытка полькователем поставить лайк дважды одному фильму.";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error requesting to add a like to a movie.");
         }
     }
 
@@ -104,8 +102,7 @@ public class FilmDbStorage implements FilmStorage {
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
         String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
         if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Лайка от пользователя с id=" + userId + " у фильма с id=" + filmId + " нет");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie has no like");
         }
     }
 
@@ -142,8 +139,9 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Set<Genre> findGenresByFilmId(Integer id) {
-        String sqlQuery = "SELECT g.genre_id, g.genre_name FROM film AS f JOIN genre_films AS gf ON f.film_id=gf.film_id JOIN genre AS g ON gf.genre_id=g.genre_id WHERE f.film_id = ?";
-        return new TreeSet<>(jdbcTemplate.query(sqlQuery, this::makeGenre, id));
+        String sqlQuery = "SELECT g.genre_id, g.genre_name FROM film AS f JOIN genre_films AS gf ON f.film_id=gf.film_id " +
+                "JOIN genre AS g ON gf.genre_id=g.genre_id WHERE f.film_id = ?";
+        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::makeGenre, id));
     }
 
     private boolean dbContainsFilm(Film film) throws EmptyResultDataAccessException {
@@ -152,27 +150,6 @@ public class FilmDbStorage implements FilmStorage {
         try {
             jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, film.getName(), film.getDescription(),
                     film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }
-
-    private boolean dbContainsUser(Integer userId) throws EmptyResultDataAccessException {
-        String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }
-
-    private boolean dbContainsFilm(Integer filmId) throws EmptyResultDataAccessException {
-        String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
-                "WHERE f.film_id = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, filmId);
             return true;
         } catch (EmptyResultDataAccessException e) {
             return false;
