@@ -22,7 +22,7 @@ public class GenreController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<Genre> getFilms() {
-        return genreService.getGenreList();
+        return genreService.getGenres();
     }
 
     @GetMapping("{id}")
