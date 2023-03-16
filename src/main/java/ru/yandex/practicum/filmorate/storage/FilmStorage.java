@@ -9,7 +9,7 @@ public interface FilmStorage {
 
     Film update(Film film);
 
-    List<Film> getFilmsList();
+    List<Film> getFilms();
 
     void addLike(Integer userId, Integer filmId);
 

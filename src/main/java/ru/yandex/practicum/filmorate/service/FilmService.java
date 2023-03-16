@@ -40,8 +40,8 @@ public class FilmService {
     }
 
     public List<Film> getFilms() {
-        log.info("films count: " + films.getFilmsList().size());
-        return films.getFilmsList();
+        log.info("films count: " + films.getFilms().size());
+        return films.getFilms();
     }
 
     public void addLike(Integer userId, Integer filmId) throws ValidateException {
@@ -53,8 +53,7 @@ public class FilmService {
 
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
         if (userId <=0 || filmId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "id and friendId cannot be less 0");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id and friendId cannot be less 0");
         }
         films.deleteLike(userId, filmId);
     }
@@ -70,7 +69,7 @@ public class FilmService {
             return -1 * filmLikes1.compareTo(filmLikes2);
 
         };
-        return films.getFilmsList().stream().sorted(sortFilm).limit(count)
+        return films.getFilms().stream().sorted(sortFilm).limit(count)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

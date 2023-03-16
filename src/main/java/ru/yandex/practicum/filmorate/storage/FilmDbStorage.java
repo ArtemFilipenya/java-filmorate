@@ -33,6 +33,9 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void add(Film film) throws ResponseStatusException {
+        if (dbContainsFilm(film)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This movie already exists.");
+        }
         Integer filmId = addFilmInfo(film);
         film.setId(filmId); // Да, имеет
         String sqlQuery = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
@@ -64,7 +67,7 @@ public class FilmDbStorage implements FilmStorage {
         return film2;
     }
 
-    public List<Film> getFilmsList() {
+    public List<Film> getFilms() {
         String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
@@ -85,6 +88,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
+        if (!dbContainsUser(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to like from a user that doesn't exist");
+        }
+        if (!dbContainsFilm(filmId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Can't like a movie that doesn't exist");
+        }
         String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQuery, userId, filmId);
@@ -95,6 +104,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
+        if (!dbContainsUser(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to remove a like from a user that doesn't exist");
+        }
+        if (!dbContainsFilm(filmId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to remove like from a movie that doesn't exist");
+        }
         String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
         if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie has no like");
@@ -137,6 +152,27 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "SELECT g.genre_id, g.genre_name FROM film AS f JOIN genre_films AS gf ON f.film_id=gf.film_id " +
                 "JOIN genre AS g ON gf.genre_id=g.genre_id WHERE f.film_id = ?";
         return new HashSet<>(jdbcTemplate.query(sqlQuery, this::makeGenre, id));
+    }
+
+    private boolean dbContainsUser(Integer userId) {
+        String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
+        try {
+            jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
+    }
+
+    private boolean dbContainsFilm(Integer filmId) {
+        String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
+                "WHERE f.film_id = ?";
+        try {
+            jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, filmId);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     private boolean dbContainsFilm(Film film) throws EmptyResultDataAccessException {
