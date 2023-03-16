@@ -20,7 +20,7 @@ public class MpaService {
         return mpas.getMpa(id);
     }
 
-    public List<Mpa> getMpasList() {
+    public List<Mpa> getMpas() {
         return mpas.getMpasList();
     }
 }
