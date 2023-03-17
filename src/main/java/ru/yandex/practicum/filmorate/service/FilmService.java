@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
@@ -18,37 +17,37 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService {
-    private final FilmStorage films;
+    private final FilmStorage filmStorage;
     private final FilmValidator filmValidator = new FilmValidator();
 
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage films) {
-        this.films = films;
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
     public Film addFilm(Film film) throws ResponseStatusException {
         filmValidator.validate(film);
-        films.add(film);
+        filmStorage.add(film);
         log.info("film was {} saved", film);
         return film;
     }
 
     public Film updateFilm(Film film) throws ValidateException {
         filmValidator.validate(film);
-        return films.update(film);
+        return filmStorage.update(film);
     }
 
     public List<Film> getFilms() {
-        log.info("films count: " + films.getFilms().size());
-        return films.getFilms();
+        log.info("films count: " + filmStorage.getFilms().size());
+        return filmStorage.getFilms();
     }
 
     public void addLike(Integer userId, Integer filmId) throws ValidateException {
-        films.addLike(userId, filmId);
+        filmStorage.addLike(userId, filmId);
     }
 
     public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
-        films.deleteLike(userId, filmId);
+        filmStorage.deleteLike(userId, filmId);
     }
 
     public List<Film> getSortedFilms(Integer count) throws ResponseStatusException {
@@ -58,13 +57,13 @@ public class FilmService {
             return -1 * filmLikes1.compareTo(filmLikes2);
 
         };
-        return films.getFilms().stream()
+        return filmStorage.getFilms().stream()
                 .sorted(sortFilm)
                 .limit(count)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public Film getFilm(Integer filmId) throws ResponseStatusException {
-        return films.getFilm(filmId);
+        return filmStorage.getFilm(filmId);
     }
 }

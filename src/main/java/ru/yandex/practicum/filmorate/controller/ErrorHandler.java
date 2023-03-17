@@ -26,12 +26,12 @@ public class ErrorHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<ErrorDto> handleException(NotFoundException e) {
-        ErrorDto errorDTO = new ErrorDto();
-        errorDTO.setMessage(e.getMessage());
-        errorDTO.setStatus(String.valueOf(e.getStatus().value()));
-        errorDTO.setTime(new Date().toString());
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage(e.getMessage());
+        errorDto.setStatus(String.valueOf(e.getStatus().value()));
+        errorDto.setTime(new Date().toString());
         log.error(e.getMessage(), e);
-        return new ResponseEntity<>(errorDTO, e.getStatus());
+        return new ResponseEntity<>(errorDto, e.getStatus());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

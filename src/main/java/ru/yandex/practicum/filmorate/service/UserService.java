@@ -20,7 +20,7 @@ public class UserService {
     private final UserValidator userValidator = new UserValidator();
 
     @Autowired
-    public UserService(@Qualifier("userDbStorage") UserStorage users) {
+    public UserService(UserStorage users) {
         this.users = users;
     }
 
