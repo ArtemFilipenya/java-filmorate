@@ -1,32 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 @Data
-@Builder
+@AllArgsConstructor
 public class User {
-    @EqualsAndHashCode.Exclude
-    private Integer id;
+    private int id;
     private String email;
     private String login;
     private String name;
-    private LocalDate birthday;
-    private final Set<User> friends = new HashSet<>();
+    private String birthday;
+    private final Set<Integer> friends = new HashSet<>();
 
-    public Map<String, Object> toMap() {
-        Map<String, Object> values = new HashMap<>();
-        values.put("email", email);
-        values.put("login", login);
-        values.put("name", name);
-        values.put("birthday", birthday);
-        return values;
+    public void addNewFriend(Integer friendId) {
+        friends.add(friendId);
+    }
+
+    public void deleteFriend(Integer friendId) {
+        friends.remove(friendId);
+    }
+
+    public Set<Integer> getAllFriends() {
+        return friends;
     }
 }

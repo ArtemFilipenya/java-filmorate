@@ -34,16 +34,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
-        </dependency>
     </dependencies>
 
     <build>
@@ -54,6 +44,7 @@
             </plugin>
         </plugins>
     </build>
+    <!--Без реп не работают проверки гит -->
     <repositories>
         <repository>
             <id>spring-milestones</id>

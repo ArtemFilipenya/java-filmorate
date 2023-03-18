@@ -18,7 +18,7 @@ public class UserValidator {
         if (user.getLogin() == null || user.getLogin().isBlank() || user.getLogin().contains(" ")) {
             throw new ValidateException("User create Fail login. The Login cannot be empty.");
         }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
+        if (LocalDate.parse(user.getBirthday()).isAfter(LocalDate.now())) {
             throw new ValidateException("User create Fail birthday.");
         }
     }
