@@ -22,15 +22,16 @@ public class MpaDbStorage implements MpaStorage{
     }
 
     @Override
-    public List<Mpa> getMpasList() {
+    public List<Mpa> getMpas() {
         String sqlQuery = "SELECT * FROM mpa";
         return jdbcTemplate.query(sqlQuery, this::makeMpa);
     }
 
     @Override
-    public Mpa getMpa(Integer id) throws EmptyResultDataAccessException {
+    public Mpa getMpa(Integer id) {
         Mpa mpa;
         String sqlQuery = "SELECT * FROM mpa WHERE mpa_id = ?";
+
         try {
             mpa = jdbcTemplate.queryForObject(sqlQuery, this::makeMpa, id);
         } catch (EmptyResultDataAccessException e) {

@@ -42,8 +42,8 @@ public class UserService {
     }
 
     public List<User> getUsers() {
-        log.info("Users count: " + userStorage.getUsersList().size());
-        return userStorage.getUsersList();
+        log.info("Users count: " + userStorage.getUsers().size());
+        return userStorage.getUsers();
     }
 
     public void addFriend(Integer userId, Integer friendId) {

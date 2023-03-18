@@ -21,6 +21,6 @@ public class MpaService {
     }
 
     public List<Mpa> getMpas() {
-        return mpaStorage.getMpasList();
+        return mpaStorage.getMpas();
     }
 }

@@ -28,7 +28,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void add(User user) throws ResponseStatusException {
+    public void add(User user) {
         if (dbContainsUser(user)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Такой пользователь уже есть");
         }
@@ -42,7 +42,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void update(User user) throws NotFoundException {
+    public void update(User user) {
         String sqlQuery = "UPDATE person " +
                 "SET email = ?, login = ?, name = ?, birthday = ? WHERE person_id = ?";
         if (jdbcTemplate.update(sqlQuery, user.getEmail(), user.getLogin(), user.getName(),
@@ -52,13 +52,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getUsersList() {
+    public List<User> getUsers() {
         String sqlQuery = "SELECT * FROM person";
         return jdbcTemplate.query(sqlQuery, this::makeUser);
     }
 
     @Override
-    public void addFriend(Integer userId, Integer friendId) throws NotFoundException, ResponseStatusException {
+    public void addFriend(Integer userId, Integer friendId) {
         dbContainsUser(userId);
         dbContainsUser(friendId);
         String sqlQuery = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
@@ -74,7 +74,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void deleteFriend(Integer userId, Integer friendId) throws ResponseStatusException {
+    public void deleteFriend(Integer userId, Integer friendId) {
         if (!dbContainsUser(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "you cannot delete a non-existent user");
         }
@@ -88,7 +88,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getCommonFriends(Integer userId, Integer friendId) throws ResponseStatusException {
+    public List<User> getCommonFriends(Integer userId, Integer friendId) {
         if (!dbContainsUser(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get friends list of non-existent user");
         }
@@ -105,7 +105,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getFriends(Integer friendId) throws ResponseStatusException {
+    public List<User> getFriends(Integer friendId) {
         if (!dbContainsUser(friendId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to get friends list of non-existent user");
         }
@@ -115,7 +115,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getUser(Integer userId) throws ResponseStatusException {
+    public User getUser(Integer userId) {
         if (!dbContainsUser(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such user exists");
         }
@@ -153,7 +153,7 @@ public class UserDbStorage implements UserStorage {
                 .build();
     }
 
-    private boolean dbContainsUser(Integer userId) throws NotFoundException {
+    private boolean dbContainsUser(Integer userId) {
         String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
         try {
             jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);

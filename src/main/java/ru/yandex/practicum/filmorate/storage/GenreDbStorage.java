@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Repository("GenreDbStorage")
+@Repository("genreDbStorage")
 public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -28,7 +28,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Genre getGenre(Integer id)  throws EmptyResultDataAccessException {
+    public Genre getGenre(Integer id) {
         Genre genre;
         String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
         try {

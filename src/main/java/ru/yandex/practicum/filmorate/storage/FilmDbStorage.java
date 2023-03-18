@@ -32,7 +32,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void add(Film film) throws ResponseStatusException {
+    public void add(Film film) {
         if (dbContainsFilm(film)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This movie already exists.");
         }
@@ -46,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update (Film film) throws NotFoundException {
+    public Film update (Film film) {
         String sqlQuery = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
         if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
@@ -74,7 +74,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     @Override
-    public Film getFilm(Integer id) throws ResponseStatusException{
+    public Film getFilm(Integer id) {
         String sqlQuery = "SELECT film_id, name, description, release_date, duration, film.mpa, mpa.mpa_name " +
                 "FROM film JOIN MPA ON film.mpa = mpa.mpa_id WHERE film.film_id = ?";
         Film film;
@@ -87,7 +87,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void addLike(Integer userId, Integer filmId) throws ResponseStatusException {
+    public void addLike(Integer userId, Integer filmId) {
         if (!dbContainsUser(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to like from a user that doesn't exist");
         }
@@ -103,7 +103,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteLike(Integer userId, Integer filmId) throws ResponseStatusException {
+    public void deleteLike(Integer userId, Integer filmId) {
         if (!dbContainsUser(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to remove a like from a user that doesn't exist");
         }
@@ -175,7 +175,7 @@ public class FilmDbStorage implements FilmStorage {
         }
     }
 
-    private boolean dbContainsFilm(Film film) throws EmptyResultDataAccessException {
+    private boolean dbContainsFilm(Film film) {
         String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
                 "WHERE f.name = ? AND  f.description = ? AND f.release_date = ? AND f.duration = ? AND f.mpa = ?";
         try {
