@@ -9,18 +9,18 @@ import java.util.List;
 
 @Service
 public class MpaService {
-    private final MpaStorage mpas;
+    private final MpaStorage mpaStorage;
 
     @Autowired
-    public MpaService(MpaStorage mpas) {
-        this.mpas = mpas;
+    public MpaService(MpaStorage mpaStorage) {
+        this.mpaStorage = mpaStorage;
     }
 
     public Mpa getMpa(Integer id) {
-        return mpas.getMpa(id);
+        return mpaStorage.getMpa(id);
     }
 
     public List<Mpa> getMpas() {
-        return mpas.getMpasList();
+        return mpaStorage.getMpasList();
     }
 }

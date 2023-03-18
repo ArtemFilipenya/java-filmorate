@@ -9,18 +9,18 @@ import java.util.List;
 
 @Service
 public class GenreService {
-    private final GenreStorage genreService;
+    private final GenreStorage genreStorage;
 
     @Autowired
-    public GenreService(GenreStorage genreService) {
-        this.genreService = genreService;
+    public GenreService(GenreStorage genreStorage) {
+        this.genreStorage = genreStorage;
     }
 
     public Genre getGenre(Integer id) {
-        return genreService.getGenre(id);
+        return genreStorage.getGenre(id);
     }
 
     public List<Genre> getGenres() {
-        return genreService.getGenresList();
+        return genreStorage.getGenresList();
     }
 }
