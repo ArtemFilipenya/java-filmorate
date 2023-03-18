@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -34,9 +36,25 @@ public class FilmDbStorage implements FilmStorage {
         Integer filmId = addFilmInfo(film);
         film.setId(filmId); // ????????
         String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
-        for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
-        }
+
+        jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                for (Genre genre : film.getGenres()) {
+                    ps.setInt(1, filmId);
+                    ps.setInt(2, genre.getId());
+                }
+            }
+
+            @Override
+            public int getBatchSize() {
+                return 0;
+            }
+        });
+
+//        for (Genre genre : film.getGenres()) {
+//            jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
+//        }
     }
 
     @Override

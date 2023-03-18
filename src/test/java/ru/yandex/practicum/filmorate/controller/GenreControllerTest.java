@@ -38,10 +38,8 @@ public class GenreControllerTest {
                 .andExpectAll(
                         status().isNotFound(),
                         result -> {
-                            assertNotNull(result.getResponse().getContentAsString()
-                                    , "Отсутствует тело сообщения");
-                            assertFalse(result.getResponse().getContentAsString().isBlank()
-                                    , "Тело ответа с сообщением пустое");
+                            assertNotNull(result.getResponse().getContentAsString(), "Отсутствует тело сообщения");
+                            assertFalse(result.getResponse().getContentAsString().isBlank(), "Тело ответа с сообщением пустое");
                         }
                 );
     }
