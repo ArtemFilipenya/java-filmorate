@@ -3,11 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -25,6 +25,9 @@ public class FilmService {
     }
 
     public Film addFilm(Film film) {
+        if (filmStorage.containsFilm(film.getId())) {
+            throw new NotFoundException("This movie already exists.");
+        }
         filmValidator.validate(film);
         filmStorage.add(film);
         log.info("film was {} saved", film);
@@ -42,10 +45,22 @@ public class FilmService {
     }
 
     public void addLike(Integer userId, Integer filmId) {
+        if (!filmStorage.containsUser(userId)) {
+            throw new NotFoundException("Unable to like from a user that doesn't exist");
+        }
+        if (!filmStorage.containsFilm(filmId)) {
+            throw new NotFoundException("Can't like a movie that doesn't exist");
+        }
         filmStorage.addLike(userId, filmId);
     }
 
     public void deleteLike(Integer userId, Integer filmId) {
+        if (!filmStorage.containsUser(userId)) {
+            throw new NotFoundException("Unable to remove a like from a user that doesn't exist");
+        }
+        if (!filmStorage.containsFilm(filmId)) {
+            throw new NotFoundException("Unable to remove like from a movie that doesn't exist");
+        }
         filmStorage.deleteLike(userId, filmId);
     }
 
@@ -58,7 +73,7 @@ public class FilmService {
         return filmStorage.getFilms().stream()
                 .sorted(sortFilm)
                 .limit(count)
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toList());
     }
 
     public Film getFilm(Integer filmId) {
