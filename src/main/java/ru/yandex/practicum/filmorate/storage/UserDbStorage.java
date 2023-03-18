@@ -62,11 +62,9 @@ public class UserDbStorage implements UserStorage {
         try {
             jdbcTemplate.update(sqlQueryToAddFriend, userId, friendId);
         } catch (DuplicateKeyException e) {
-            String message = "Unable to add to friends a user who is already friends";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+            throw new NotFoundException("Unable to add to friends a user who is already friends");
         } catch (DataIntegrityViolationException e) {
-            String message = "Unable to add friends to myself";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+            throw new NotFoundException("Unable to add friends to myself");
         }
     }
 
@@ -75,7 +73,7 @@ public class UserDbStorage implements UserStorage {
         String sqlQueryToDeleteFromFriends = "DELETE FROM friend_request WHERE sender_id = ? AND addressee_id = ?";
 
         if (jdbcTemplate.update(sqlQueryToDeleteFromFriends, userId, friendId) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No like from user");
+            throw new NotFoundException("No like from user");
         }
     }
 

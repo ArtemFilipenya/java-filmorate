@@ -2,10 +2,9 @@ package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.sql.ResultSet;
@@ -34,7 +33,7 @@ public class GenreDbStorage implements GenreStorage {
         try {
             genre = jdbcTemplate.queryForObject(sqlQueryToGetGenreById, this::makeGenre, id);
         } catch (EmptyResultDataAccessException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find the Genre");
+            throw new NotFoundException("Cannot find the Genre");
         }
         return genre;
     }
