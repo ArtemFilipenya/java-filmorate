@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,24 +38,23 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(filmId); // ????????
         String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
 
-        jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                for (Genre genre : film.getGenres()) {
-                    ps.setInt(1, filmId);
-                    ps.setInt(2, genre.getId());
-                }
-            }
-
-            @Override
-            public int getBatchSize() {
-                return 0;
-            }
-        });
-
-//        for (Genre genre : film.getGenres()) {
-//            jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
-//        }
+        for (Genre genre : film.getGenres()) {
+            jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
+        }
+//        jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
+//            @Override
+//            public void setValues(PreparedStatement ps, int i) throws SQLException {
+//                for (Genre genre : film.getGenres()) {
+//                    ps.setInt(1, filmId);
+//                    ps.setInt(2, genre.getId());
+//                }
+//            }
+//
+//            @Override
+//            public int getBatchSize() {
+//                return 0;
+//            }
+//        });
     }
 
     @Override
