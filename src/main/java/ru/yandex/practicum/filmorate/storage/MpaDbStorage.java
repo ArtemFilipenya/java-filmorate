@@ -6,7 +6,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.sql.ResultSet;
@@ -36,7 +35,7 @@ public class MpaDbStorage implements MpaStorage{
         try {
             mpa = jdbcTemplate.queryForObject(sqlQueryToGetMpaById, this::makeMpa, id);
         } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("Rating not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rating not found");
         }
         return mpa;
     }

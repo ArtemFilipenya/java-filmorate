@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -14,10 +13,8 @@ import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,13 +32,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void add(Film film) {
         Integer filmId = addFilmInfo(film);
-        film.setId(filmId);
+        film.setId(filmId); // ????????
         String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
-
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
         }
-
     }
 
     @Override
