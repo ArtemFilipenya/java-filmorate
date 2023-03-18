@@ -37,49 +37,47 @@ public class FilmDbStorage implements FilmStorage {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This movie already exists.");
         }
         Integer filmId = addFilmInfo(film);
-        film.setId(filmId); // Да, имеет
-        String sqlQuery = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
-
+        film.setId(filmId);
+        String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(sqlQuery, filmId, genre.getId());
+            jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
         }
     }
 
     @Override
     public Film update (Film film) {
-        String sqlQuery = "UPDATE film " +
+        String sqlQueryForUpdateFilm = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
-        if (jdbcTemplate.update(sqlQuery, film.getName(), film.getDescription(), film.getReleaseDate()
+        String sqlQueryForDeleteById = "DELETE FROM genre_films WHERE film_id = ?";
+        String sqlQueryToAddFilmIdAndGenreId = "INSERT INTO genre_films (film_id, genre_id) VALUES (?, ?)";
+
+        if (jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(), film.getReleaseDate()
                 , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
             throw new NotFoundException("Not found the film");
         }
         if (film.getGenres().size() == 0) {
-            String sqlQuery2 = "DELETE FROM genre_films WHERE film_id = ?";
-            jdbcTemplate.update(sqlQuery2, film.getId());
+            jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
         }
         if (film.getGenres() != null && film.getGenres().size() != 0) {
-            String sqlQuery2 = "DELETE FROM genre_films WHERE film_id = ?";
-            jdbcTemplate.update(sqlQuery2, film.getId());
-            String sqlQuery3 = "INSERT INTO genre_films (film_id, genre_id) VALUES (?, ?)";
-            film.getGenres().forEach(genre -> jdbcTemplate.update(sqlQuery3, film.getId(), genre.getId()));
+            jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
+            film.getGenres().forEach(genre -> jdbcTemplate.update(sqlQueryToAddFilmIdAndGenreId, film.getId(), genre.getId()));
         }
-        Film film2 = getFilm(film.getId());
-        return film2;
+        return getFilm(film.getId());
     }
 
     public List<Film> getFilms() {
-        String sqlQuery = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
-        return jdbcTemplate.query(sqlQuery, this::makeFilm);
+        String sqlQueryToGetAllFilms = "SELECT film.*, mpa.mpa_name FROM film JOIN mpa ON film.mpa = mpa.mpa_id";
+        return jdbcTemplate.query(sqlQueryToGetAllFilms, this::makeFilm);
     }
 
 
     @Override
     public Film getFilm(Integer id) {
-        String sqlQuery = "SELECT film_id, name, description, release_date, duration, film.mpa, mpa.mpa_name " +
+        String sqlQueryToGetFilmById = "SELECT film_id, name, description, release_date, duration, film.mpa, mpa.mpa_name " +
                 "FROM film JOIN MPA ON film.mpa = mpa.mpa_id WHERE film.film_id = ?";
         Film film;
         try {
-            film = jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, id);
+            film = jdbcTemplate.queryForObject(sqlQueryToGetFilmById, this::makeFilm, id);
         } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "there is no movie with this id");
         }
@@ -94,9 +92,9 @@ public class FilmDbStorage implements FilmStorage {
         if (!dbContainsFilm(filmId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Can't like a movie that doesn't exist");
         }
-        String sqlQuery = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
+        String sqlQueryToLikeFilm = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
-            jdbcTemplate.update(sqlQuery, userId, filmId);
+            jdbcTemplate.update(sqlQueryToLikeFilm, userId, filmId);
         } catch (DuplicateKeyException e ) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error requesting to add a like to a movie.");
         }
@@ -110,8 +108,8 @@ public class FilmDbStorage implements FilmStorage {
         if (!dbContainsFilm(filmId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to remove like from a movie that doesn't exist");
         }
-        String sqlQuery = "DELETE FROM likes where person_id = ? AND film_id = ?";
-        if (jdbcTemplate.update(sqlQuery, userId, filmId) == 0) {
+        String sqlQueryToDeleteLikeFromFilm = "DELETE FROM likes where person_id = ? AND film_id = ?";
+        if (jdbcTemplate.update(sqlQueryToDeleteLikeFromFilm, userId, filmId) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie has no like");
         }
     }
@@ -125,8 +123,9 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getInt("duration"))
                 .mpa(new Mpa(resultSet.getInt("mpa"), resultSet.getString("mpa_name")))
                 .build();
-        String sqlQuery = "SELECT person.* FROM likes JOIN person ON likes.person_id=person.person_id WHERE likes.film_id=?";
-        film.getLikes().addAll(jdbcTemplate.query(sqlQuery, this::makeUser, film.getId()));
+        String sqlQueryToGetAllUsersByFilmId = "SELECT person.* FROM likes JOIN person ON" +
+                " likes.person_id=person.person_id WHERE likes.film_id=?";
+        film.getLikes().addAll(jdbcTemplate.query(sqlQueryToGetAllUsersByFilmId, this::makeUser, film.getId()));
         film.getGenres().addAll(findGenresByFilmId(film.getId()));
         return film;
     }
@@ -149,15 +148,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Set<Genre> findGenresByFilmId(Integer id) {
-        String sqlQuery = "SELECT g.genre_id, g.genre_name FROM film AS f JOIN genre_films AS gf ON f.film_id=gf.film_id " +
-                "JOIN genre AS g ON gf.genre_id=g.genre_id WHERE f.film_id = ?";
-        return new HashSet<>(jdbcTemplate.query(sqlQuery, this::makeGenre, id));
+        String sqlQueryToFindGenresByFilmId = "SELECT g.genre_id, g.genre_name FROM film AS f JOIN genre_films AS gf" +
+                " ON f.film_id=gf.film_id JOIN genre AS g ON gf.genre_id=g.genre_id WHERE f.film_id = ?";
+        return new HashSet<>(jdbcTemplate.query(sqlQueryToFindGenresByFilmId, this::makeGenre, id));
     }
 
     private boolean dbContainsUser(Integer userId) {
-        String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
+        String sqlQueryToFindUserById = "SELECT * FROM person WHERE person_id = ?";
         try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId);
+            jdbcTemplate.queryForObject(sqlQueryToFindUserById, this::makeUser, userId);
             return true;
         } catch (EmptyResultDataAccessException e) {
             return false;
@@ -165,10 +164,10 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private boolean dbContainsFilm(Integer filmId) {
-        String sqlQuery = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
+        String sqlQueryToFindFilmById = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
                 "WHERE f.film_id = ?";
         try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, filmId);
+            jdbcTemplate.queryForObject(sqlQueryToFindFilmById, this::makeFilm, filmId);
             return true;
         } catch (EmptyResultDataAccessException e) {
             return false;

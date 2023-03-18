@@ -21,6 +21,6 @@ public class GenreService {
     }
 
     public List<Genre> getGenres() {
-        return genreStorage.getGenresList();
+        return genreStorage.getGenres();
     }
 }

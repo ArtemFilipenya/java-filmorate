@@ -12,7 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Repository("MpaDbStorage")
+@Repository("mpaDbStorage")
 public class MpaDbStorage implements MpaStorage{
     private final JdbcTemplate jdbcTemplate;
 
@@ -23,17 +23,17 @@ public class MpaDbStorage implements MpaStorage{
 
     @Override
     public List<Mpa> getMpas() {
-        String sqlQuery = "SELECT * FROM mpa";
-        return jdbcTemplate.query(sqlQuery, this::makeMpa);
+        String sqlQueryToGetMpas = "SELECT * FROM mpa";
+        return jdbcTemplate.query(sqlQueryToGetMpas, this::makeMpa);
     }
 
     @Override
     public Mpa getMpa(Integer id) {
         Mpa mpa;
-        String sqlQuery = "SELECT * FROM mpa WHERE mpa_id = ?";
+        String sqlQueryToGetMpaById = "SELECT * FROM mpa WHERE mpa_id = ?";
 
         try {
-            mpa = jdbcTemplate.queryForObject(sqlQuery, this::makeMpa, id);
+            mpa = jdbcTemplate.queryForObject(sqlQueryToGetMpaById, this::makeMpa, id);
         } catch (EmptyResultDataAccessException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Rating not found");
         }

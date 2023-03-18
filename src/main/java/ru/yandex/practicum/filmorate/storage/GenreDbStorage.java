@@ -22,19 +22,19 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> getGenresList() {
-        String sqlQuery = "SELECT * FROM genre";
-        return jdbcTemplate.query(sqlQuery, this::makeGenre);
+    public List<Genre> getGenres() {
+        String sqlQueryToGetGenres = "SELECT * FROM genre";
+        return jdbcTemplate.query(sqlQueryToGetGenres, this::makeGenre);
     }
 
     @Override
     public Genre getGenre(Integer id) {
         Genre genre;
-        String sqlQuery = "SELECT * FROM genre WHERE genre_id = ?";
+        String sqlQueryToGetGenreById = "SELECT * FROM genre WHERE genre_id = ?";
         try {
-            genre = jdbcTemplate.queryForObject(sqlQuery, this::makeGenre, id);
+            genre = jdbcTemplate.queryForObject(sqlQueryToGetGenreById, this::makeGenre, id);
         } catch (EmptyResultDataAccessException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Жанра с id=" + id + " нет");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Cannot find the Genre");
         }
         return genre;
     }
