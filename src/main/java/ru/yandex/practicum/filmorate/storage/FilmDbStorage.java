@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.relational.core.sql.Not;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -74,8 +75,8 @@ public class FilmDbStorage implements FilmStorage {
         Film film;
         try {
             film = jdbcTemplate.queryForObject(sqlQueryToGetFilmById, this::makeFilm, id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "there is no movie with this id");
+        } catch (NotFoundException e) {
+            throw new NotFoundException("There is no movie with this id.");
         }
         return film;
     }
@@ -85,8 +86,8 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQueryToLikeFilm = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
             jdbcTemplate.update(sqlQueryToLikeFilm, userId, filmId);
-        } catch (DuplicateKeyException e ) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error requesting to add a like to a movie.");
+        } catch (NotFoundException e ) {
+            throw new NotFoundException("Error requesting to add a like to a movie.");
         }
     }
 
@@ -94,7 +95,7 @@ public class FilmDbStorage implements FilmStorage {
     public void deleteLike(Integer userId, Integer filmId) {
         String sqlQueryToDeleteLikeFromFilm = "DELETE FROM likes where person_id = ? AND film_id = ?";
         if (jdbcTemplate.update(sqlQueryToDeleteLikeFromFilm, userId, filmId) == 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Movie has no like");
+            throw new NotFoundException("Movie has no like");
         }
     }
 
@@ -105,7 +106,7 @@ public class FilmDbStorage implements FilmStorage {
         try {
             jdbcTemplate.queryForObject(sqlQueryToFindFilmById, this::makeFilm, id);
             return true;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (NotFoundException e) {
             return false;
         }
     }
@@ -118,7 +119,7 @@ public class FilmDbStorage implements FilmStorage {
             jdbcTemplate.queryForObject(sqlQueryToFindFilm, this::makeFilm, film.getName(), film.getDescription(),
                     film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
             return true;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (NotFoundException e) {
             return false;
         }
     }
@@ -129,7 +130,7 @@ public class FilmDbStorage implements FilmStorage {
         try {
             jdbcTemplate.queryForObject(sqlQuery, this::makeUser, id);
             return true;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (NotFoundException e) {
             return false;
         }
     }
