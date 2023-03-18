@@ -25,4 +25,8 @@ public interface UserStorage {
     List<User> getFriends(Integer friendId);
 
     User getUser(Integer userId);
+
+    boolean containsUser(Integer id);
+
+    boolean containsUser(User user);
 }
