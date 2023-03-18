@@ -35,7 +35,7 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void add(Film film) {
         Integer filmId = addFilmInfo(film);
-        film.setId(filmId); // ????????
+        film.setId(filmId);
         String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
 
         for (Genre genre : film.getGenres()) {
