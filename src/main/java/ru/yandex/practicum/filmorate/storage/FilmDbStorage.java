@@ -41,20 +41,7 @@ public class FilmDbStorage implements FilmStorage {
         for (Genre genre : film.getGenres()) {
             jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
         }
-//        jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
-//            @Override
-//            public void setValues(PreparedStatement ps, int i) throws SQLException {
-//                for (Genre genre : film.getGenres()) {
-//                    ps.setInt(1, filmId);
-//                    ps.setInt(2, genre.getId());
-//                }
-//            }
-//
-//            @Override
-//            public int getBatchSize() {
-//                return 0;
-//            }
-//        });
+
     }
 
     @Override
