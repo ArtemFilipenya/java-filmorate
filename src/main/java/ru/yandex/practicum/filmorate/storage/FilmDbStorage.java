@@ -173,6 +173,7 @@ public class FilmDbStorage implements FilmStorage {
         return simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
     }
 
+
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
                 .id(resultSet.getInt("person_id"))
