@@ -1,87 +1,99 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.validator.UserValidator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
     private final UserValidator userValidator;
 
-    @Autowired
-    public UserService(UserStorage userStorage, UserValidator userValidator) {
-        this.userStorage = userStorage;
-        this.userValidator = userValidator;
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
     }
 
-    public User addUser(User user) {
-        if (userStorage.containsUser(user)) {
-            throw new NotFoundException("This user already exists");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+    public User getUserById(int id) {
+        return userStorage.getUserById(id);
+    }
+
+    public User addNewUser(User user) {
         userValidator.validate(user);
-        userStorage.add(user);
-        log.info("User {} saved", user);
+        checkUserName(user);
+        userStorage.addNewUser(user);
+        log.info(String.format("User with id=[%d] has been created.", user.getId()));
         return user;
+    }
+
+    public void deleteUser(User user) {
+        userStorage.deleteUser(user);
+        log.info(String.format("User with id=[%d] has been deleted.", user.getId()));
     }
 
     public User updateUser(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
+        checkUserName(user);
         userValidator.validate(user);
-        userStorage.update(user);
-        log.info("User {} saved", user);
+        userStorage.updateUser(user);
+        log.info(String.format("User with id=[%d] has been updated.", user.getId()));
         return user;
     }
 
-    public List<User> getUsers() {
-        log.info("Users count: " + userStorage.getUsers().size());
-        return userStorage.getUsers();
+    public void addNewFriend(int userId, int friendId) {
+        User user = userStorage.getUserById(userId);
+        User friend = userStorage.getUserById(friendId);
+
+        user.addNewFriend(friendId);
+        friend.addNewFriend(userId);
+        log.info(String.format("User with id=[%d] added user with id=[%d] to friends.", userId, friendId));
     }
 
-    public void addFriend(Integer userId, Integer friendId) {
-        if (!userStorage.containsUser(userId) || !userStorage.containsUser(friendId)) {
-            throw new NotFoundException("Users not found.");
-        }
-        userStorage.addFriend(userId, friendId);
+    public void deleteFriend(int userId, int friendId) {
+        User user = userStorage.getUserById(userId);
+        User friend = userStorage.getUserById(friendId);
+
+        user.deleteFriend(friendId);
+        friend.deleteFriend(userId);
+        log.info(String.format("User with id=[%d] delete friend with id=[%d]", userId, friendId));
     }
 
-    public void deleteFriend(Integer userId, Integer friendId) {
-        if (!userStorage.containsUser(userId) || !userStorage.containsUser(friendId)) {
-            throw new NotFoundException("you cannot delete a non-existent user");
+    public List<User> getCommonFriends(int userId, int friendId) {
+        List<Integer> commonFriendsId = new ArrayList<>(getAllFriendIds(userId));
+        commonFriendsId.retainAll(getAllFriendIds(friendId));
+        List<User> commonFriends = new ArrayList<>();
+
+        for (Integer id: commonFriendsId) {
+            commonFriends.add(userStorage.getUserById(id));
         }
-        userStorage.deleteFriend(userId, friendId);
+        return commonFriends;
     }
 
-    public List<User> getCommonFriends(Integer userId, Integer friendId) {
-        if (!userStorage.containsUser(userId) || !userStorage.containsUser(friendId)) {
-            throw new NotFoundException("Unable to get friends list of non-existent user");
+    public List<User> getAllFriends(int userId) {
+        User user = userStorage.getUserById(userId);
+        List<User> friends = new ArrayList<>();
+
+        for (Integer friend: user.getFriends()) {
+            friends.add(userStorage.getUserById(friend));
         }
-        return  userStorage.getCommonFriends(userId, friendId);
+        return friends;
     }
 
-    public List<User> getFriends(Integer friendId) {
-        if (!userStorage.containsUser(friendId)) {
-            throw new NotFoundException("Unable to get friends list of non-existent user");
-        }
-        return userStorage.getFriends(friendId);
+    private List<Integer> getAllFriendIds(int userId) {
+        User user = userStorage.getUserById(userId);
+
+        return new ArrayList<>(user.getAllFriends());
     }
 
-    public User getUser(Integer userId) {
-        if (!userStorage.containsUser(userId)) {
-            throw new NotFoundException("No such user exists");
+    private void checkUserName(User user) {
+        if (user.getName() == null || user.getName().isBlank() || user.getName().isEmpty()) {
+            user.setName(user.getLogin());
         }
-        return userStorage.getUser(userId);
     }
 }
