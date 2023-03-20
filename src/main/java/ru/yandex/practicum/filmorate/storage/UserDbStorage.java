@@ -6,6 +6,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -29,10 +31,21 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void add(User user) {
-        Integer userId = addUserInfo(user);
-        user.setId(userId);
+        addUserId(user);
         String sqlQueryToAddUser = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
-        user.getFriends().stream().map(friend -> jdbcTemplate.update(sqlQueryToAddUser, userId, friend));
+        user.getFriends().stream().map(friend -> jdbcTemplate.batchUpdate(sqlQueryToAddUser,
+                new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, user.getId());
+                ps.setObject(2, friend);
+            }
+
+            @Override
+            public int getBatchSize() {
+                return 1;
+            }
+        }));
     }
 
     @Override
@@ -60,7 +73,18 @@ public class UserDbStorage implements UserStorage {
         String sqlQueryToAddFriend = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
 
         try {
-            jdbcTemplate.update(sqlQueryToAddFriend, userId, friendId);
+            jdbcTemplate.batchUpdate(sqlQueryToAddFriend, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, userId);
+                    ps.setInt(2, friendId);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return 1;
+                }
+            });
         } catch (DuplicateKeyException e) {
             throw new NotFoundException("Unable to add to friends a user who is already friends");
         } catch (DataIntegrityViolationException e) {
@@ -126,11 +150,11 @@ public class UserDbStorage implements UserStorage {
         }
     }
 
-    private int addUserInfo(User user) {
+    private void addUserId(User user) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("person")
                 .usingGeneratedKeyColumns("person_id");
-        return simpleJdbcInsert.executeAndReturnKey(user.toMap()).intValue();
+        user.setId(simpleJdbcInsert.executeAndReturnKey(user.toMap()).intValue());
     }
 
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {

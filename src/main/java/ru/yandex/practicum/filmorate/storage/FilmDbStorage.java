@@ -34,27 +34,26 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void add(Film film) {
-        Integer filmId = addFilmInfo(film);
-        film.setId(filmId); // ????????
+        addFilmId(film);
         String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
-
+        List<Integer> genres = new ArrayList<>();
         for (Genre genre : film.getGenres()) {
-            jdbcTemplate.update(sqlQueryToAddFilm, filmId, genre.getId());
+            genres.add(genre.getId());
         }
-//        jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
-//            @Override
-//            public void setValues(PreparedStatement ps, int i) throws SQLException {
-//                for (Genre genre : film.getGenres()) {
-//                    ps.setInt(1, filmId);
-//                    ps.setInt(2, genre.getId());
-//                }
-//            }
-//
-//            @Override
-//            public int getBatchSize() {
-//                return 0;
-//            }
-//        });
+
+        jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, film.getId());
+                ps.setInt(2, genres.get(i));
+            }
+
+            @Override
+            public int getBatchSize() {
+                return genres.size();
+            }
+        });
+
     }
 
     @Override
@@ -69,11 +68,44 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException("Not found the film");
         }
         if (film.getGenres().size() == 0) {
-            jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
+            jdbcTemplate.batchUpdate(sqlQueryForDeleteById, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, film.getId());
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return 1;
+                }
+            });
         }
         if (film.getGenres() != null && film.getGenres().size() != 0) {
-            jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
-            film.getGenres().forEach(genre -> jdbcTemplate.update(sqlQueryToAddFilmIdAndGenreId, film.getId(), genre.getId()));
+            jdbcTemplate.batchUpdate(sqlQueryForDeleteById, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, film.getId());
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return 1;
+                }
+            });
+
+            film.getGenres().forEach(genre -> jdbcTemplate.batchUpdate(sqlQueryToAddFilmIdAndGenreId,
+                    new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, film.getId());
+                    ps.setInt(2, genre.getId());
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return 1;
+                }
+            }));
         }
         return getFilm(film.getId());
     }
@@ -100,7 +132,18 @@ public class FilmDbStorage implements FilmStorage {
     public void addLike(Integer userId, Integer filmId) {
         String sqlQueryToLikeFilm = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
         try {
-            jdbcTemplate.update(sqlQueryToLikeFilm, userId, filmId);
+            jdbcTemplate.batchUpdate(sqlQueryToLikeFilm, new BatchPreparedStatementSetter() {
+                @Override
+                public void setValues(PreparedStatement ps, int i) throws SQLException {
+                    ps.setInt(1, userId);
+                    ps.setInt(2, filmId);
+                }
+
+                @Override
+                public int getBatchSize() {
+                    return 1;
+                }
+            });
         } catch (DuplicateKeyException e ) {
             throw new NotFoundException("Error requesting to add a like to a movie.");
         }
@@ -166,13 +209,12 @@ public class FilmDbStorage implements FilmStorage {
         return film;
     }
 
-    private int addFilmInfo(Film film) {
+    private void addFilmId(Film film) {
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("film")
                 .usingGeneratedKeyColumns("film_id");
-        return simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue();
+        film.setId(simpleJdbcInsert.executeAndReturnKey(film.toMap()).intValue());
     }
-
 
     private User makeUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()

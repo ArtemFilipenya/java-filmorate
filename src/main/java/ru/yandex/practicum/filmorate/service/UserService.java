@@ -23,21 +23,14 @@ public class UserService {
     }
 
     public User addUser(User user) {
-<<<<<<< HEAD
         if (userStorage.containsUser(user)) {
             throw new NotFoundException("This user already exists");
         }
-=======
->>>>>>> 8a7ce8c (v5.0)
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
-<<<<<<< HEAD
         userStorage.add(user);
-=======
-        users.add(user);
->>>>>>> 8a7ce8c (v5.0)
         log.info("User {} saved", user);
         return user;
     }
@@ -47,17 +40,12 @@ public class UserService {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
-<<<<<<< HEAD
         userStorage.update(user);
-=======
-        users.update(user);
->>>>>>> 8a7ce8c (v5.0)
         log.info("User {} saved", user);
         return user;
     }
 
     public List<User> getUsers() {
-<<<<<<< HEAD
         log.info("Users count: " + userStorage.getUsers().size());
         return userStorage.getUsers();
     }
@@ -65,57 +53,27 @@ public class UserService {
     public void addFriend(Integer userId, Integer friendId) {
         if (!userStorage.containsUser(userId) || !userStorage.containsUser(friendId)) {
             throw new NotFoundException("Users not found.");
-=======
-        log.info("User count: " + users.getUsersList().size());
-        return users.getUsersList();
-    }
-
-    public void addFriend(Integer userId, Integer friendId) {
-        if (userId <=0 || friendId <= 0) {
-            throw new NotFoundException("id and friendId cannot be less 0");
->>>>>>> 8a7ce8c (v5.0)
         }
         userStorage.addFriend(userId, friendId);
     }
 
     public void deleteFriend(Integer userId, Integer friendId) {
-<<<<<<< HEAD
         if (!userStorage.containsUser(userId) || !userStorage.containsUser(friendId)) {
             throw new NotFoundException("you cannot delete a non-existent user");
-=======
-        if (userId <=0 || friendId <= 0) {
-            throw new ValidateException("id and friendId cannot be less 0");
-        }
-        if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cant delete yourself");
->>>>>>> 8a7ce8c (v5.0)
         }
         userStorage.deleteFriend(userId, friendId);
     }
 
     public List<User> getCommonFriends(Integer userId, Integer friendId) {
-<<<<<<< HEAD
         if (!userStorage.containsUser(userId) || !userStorage.containsUser(friendId)) {
             throw new NotFoundException("Unable to get friends list of non-existent user");
-=======
-        if (userId <=0 || friendId <= 0) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "id and friendId cannot be less 0");
-        }
-        if (userId.equals(friendId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to request mutual friends of self");
->>>>>>> 8a7ce8c (v5.0)
         }
         return  userStorage.getCommonFriends(userId, friendId);
     }
 
     public List<User> getFriends(Integer friendId) {
-<<<<<<< HEAD
         if (!userStorage.containsUser(friendId)) {
             throw new NotFoundException("Unable to get friends list of non-existent user");
-=======
-        if (friendId <=0 ) {
-            throw new ValidateException("id and friendId cannot be less 0");
->>>>>>> 8a7ce8c (v5.0)
         }
         return userStorage.getFriends(friendId);
     }
