@@ -26,6 +26,9 @@ import java.util.Set;
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    // Наставник написал, чтоб отменил мерж пулл реквеста, добавил новый и засунул изменения в него. История  с
+    // замечаниями останется в старом. Прости,что так вышло, но уже как есть.
+    // Замечания оставлял по поводу нэйминг sql запросов и batchUpdate.
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
