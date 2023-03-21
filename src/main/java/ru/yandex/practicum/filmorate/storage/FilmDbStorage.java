@@ -108,23 +108,19 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void addLike(Integer userId, Integer filmId) {
-        String sqlQueryToLikeFilm = "INSERT INTO likes (person_id, film_id) VALUES (?, ?)";
-        try {
-            jdbcTemplate.batchUpdate(sqlQueryToLikeFilm, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setInt(1, userId);
-                    ps.setInt(2, filmId);
-                }
+        String sqlQueryToLikeFilm = "MERGE INTO likes (person_id, film_id) VALUES (?, ?)";
+        jdbcTemplate.batchUpdate(sqlQueryToLikeFilm, new BatchPreparedStatementSetter() {
+            @Override
+            public void setValues(PreparedStatement ps, int i) throws SQLException {
+                ps.setInt(1, userId);
+                ps.setInt(2, filmId);
+            }
 
-                @Override
-                public int getBatchSize() {
-                    return 1;
-                }
-            });
-        } catch (DuplicateKeyException e ) {
-            throw new NotFoundException("Error requesting to add a like to a movie.");
-        }
+            @Override
+            public int getBatchSize() {
+                return 1;
+            }
+        });
     }
 
     @Override
@@ -138,6 +134,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQueryToFindFilmById = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
                 "WHERE f.film_id = ?";
         try {
+            // Как ты писал, чтоб исправил не работает
             jdbcTemplate.queryForObject(sqlQueryToFindFilmById, this::makeFilm, id);
             return true;
         } catch (EmptyResultDataAccessException e) {
