@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface UserStorage {
-    void add(User user);
+    void saveUser(User user);
 
     void delete(User user);
 

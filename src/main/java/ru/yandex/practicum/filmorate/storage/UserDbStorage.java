@@ -19,7 +19,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-@Repository("userDbStorage")
 @Slf4j
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
@@ -30,7 +29,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public void add(User user) {
+    public void saveUser(User user) {
         addUserId(user);
         String sqlQueryToAddUser = "INSERT INTO friend_request (sender_id, addressee_id) VALUES (?, ?)";
         user.getFriends().stream().map(friend -> jdbcTemplate.batchUpdate(sqlQueryToAddUser,

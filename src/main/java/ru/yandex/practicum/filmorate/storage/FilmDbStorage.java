@@ -22,13 +22,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Repository("filmDbStorage")
 @Slf4j
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-    // Наставник написал, чтоб отменил мерж пулл реквеста, добавил новый и засунул изменения в него. История  с
-    // замечаниями останется в старом. Прости,что так вышло, но уже как есть.
-    // Замечания оставлял по поводу нэйминг sql запросов и batchUpdate.
 
     @Autowired
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
@@ -36,24 +32,24 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public void add(Film film) {
+    public void saveFilm(Film film) {
         addFilmId(film);
         String sqlQueryToAddFilm = "INSERT into genre_films (film_id, genre_id) VALUES (?, ?)";
-        List<Integer> genres = new ArrayList<>();
+        List<Integer> genreIds = new ArrayList<>();
         for (Genre genre : film.getGenres()) {
-            genres.add(genre.getId());
+            genreIds.add(genre.getId());
         }
 
         jdbcTemplate.batchUpdate(sqlQueryToAddFilm, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setInt(1, film.getId());
-                ps.setInt(2, genres.get(i));
+                ps.setInt(2, genreIds.get(i));
             }
 
             @Override
             public int getBatchSize() {
-                return genres.size();
+                return genreIds.size();
             }
         });
 
@@ -66,10 +62,10 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQueryForDeleteById = "DELETE FROM genre_films WHERE film_id = ?";
         String sqlQueryToAddFilmIdAndGenreId = "INSERT INTO genre_films (film_id, genre_id) VALUES (?, ?)";
 
-        if (jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(), film.getReleaseDate()
-                , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
-            throw new NotFoundException("Not found the film");
-        }
+//        if (jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(), film.getReleaseDate()
+//                , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
+//            throw new NotFoundException("Not found the film");
+//        }
         if (film.getGenres().size() == 0) {
             jdbcTemplate.batchUpdate(sqlQueryForDeleteById, new BatchPreparedStatementSetter() {
                 @Override

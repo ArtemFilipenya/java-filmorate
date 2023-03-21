@@ -30,7 +30,7 @@ public class UserService {
             user.setName(user.getLogin());
         }
         userValidator.validate(user);
-        userStorage.add(user);
+        userStorage.saveUser(user);
         log.info("User {} saved", user);
         return user;
     }

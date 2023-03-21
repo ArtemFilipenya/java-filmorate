@@ -29,7 +29,7 @@ public class FilmService {
             throw new NotFoundException("This movie already exists.");
         }
         filmValidator.validate(film);
-        filmStorage.add(film);
+        filmStorage.saveFilm(film);
         log.info("film was {} saved", film);
         return film;
     }
@@ -64,7 +64,7 @@ public class FilmService {
         filmStorage.deleteLike(userId, filmId);
     }
 
-    public List<Film> getSortedFilms(Integer count) {
+    public List<Film> getTheMostPopularFilms(Integer count) {
         Comparator<Film> sortFilm = (f1, f2) -> {
             Integer filmLikes1 = f1.getLikes().size();
             Integer filmLikes2 = f2.getLikes().size();
