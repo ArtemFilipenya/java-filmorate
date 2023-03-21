@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
-@Repository("filmDbStorage")
+@Repository("filmDbStorage") // Без этого не работает
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
@@ -63,10 +63,10 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQueryForDeleteById = "DELETE FROM genre_films WHERE film_id = ?";
         String sqlQueryToAddFilmIdAndGenreId = "INSERT INTO genre_films (film_id, genre_id) VALUES (?, ?)";
 
-//        if (jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(), film.getReleaseDate()
-//                , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
-//            throw new NotFoundException("Not found the film");
-//        }
+        if (jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(), film.getReleaseDate()
+                , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
+            throw new NotFoundException("Not found the film");
+        }
         if (film.getGenres().size() == 0) {
             jdbcTemplate.batchUpdate(sqlQueryForDeleteById, new BatchPreparedStatementSetter() {
                 @Override
@@ -81,18 +81,7 @@ public class FilmDbStorage implements FilmStorage {
             });
         }
         if (film.getGenres() != null && film.getGenres().size() != 0) {
-            jdbcTemplate.batchUpdate(sqlQueryForDeleteById, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setInt(1, film.getId());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return 1;
-                }
-            });
-
+            jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
             film.getGenres().forEach(genre -> jdbcTemplate.batchUpdate(sqlQueryToAddFilmIdAndGenreId,
                     new BatchPreparedStatementSetter() {
                 @Override
