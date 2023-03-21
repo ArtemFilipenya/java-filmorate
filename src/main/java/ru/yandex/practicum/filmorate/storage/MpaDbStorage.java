@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+@Repository("mpaDbStorage")
 public class MpaDbStorage implements MpaStorage{
     private final JdbcTemplate jdbcTemplate;
 

@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Slf4j
+@Repository("userDbStorage")
 public class UserDbStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
 

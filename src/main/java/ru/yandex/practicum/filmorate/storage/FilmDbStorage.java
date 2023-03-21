@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 @Slf4j
+@Repository("filmDbStorage")
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
