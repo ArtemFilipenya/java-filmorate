@@ -24,19 +24,16 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public User addUser(@RequestBody User user) {
         return userService.addUser(user);
     }
 
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public User updateUser(@RequestBody User user) {
         return userService.updateUser(user);
     }
 
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<User> getUsers() {
         return userService.getUsers();
     }
@@ -58,7 +55,6 @@ public class UserController {
 
     @GetMapping("{id}/friends")
     public List<User> getUserFriends(@PathVariable("id") Integer userId) {
-
         return userService.getFriends(userId);
     }
 

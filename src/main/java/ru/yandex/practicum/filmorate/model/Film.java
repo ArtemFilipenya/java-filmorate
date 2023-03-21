@@ -13,17 +13,17 @@ import java.util.Set;
 @Data
 @Builder
 public class Film {
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private Integer id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private Integer duration;
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private final Set<User> likes = new HashSet<>();
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private final Set<Genre> genres = new HashSet<>();
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private Mpa mpa;
 
     public Map<String, Object> toMap() {

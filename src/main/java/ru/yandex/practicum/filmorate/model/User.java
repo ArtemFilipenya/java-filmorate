@@ -13,7 +13,7 @@ import java.util.Set;
 @Data
 @Builder
 public class User {
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private Integer id;
     private String email;
     private String login;
