@@ -19,4 +19,6 @@ public interface FilmStorage {
     Film getFilm (Integer id);
 
     boolean containsFilm(Integer id);
+
+    void checkFilmForUpdate(Film film);
 }

@@ -56,16 +56,21 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film update (Film film) {
+    public void checkFilmForUpdate(Film film) {
         String sqlQueryForUpdateFilm = "UPDATE film " +
                 "SET name = ?, description = ?, release_date = ?, duration = ?, mpa = ? WHERE film_id = ?";
+        int numberOfRowsUpdate = jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(),
+                film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId());
+        if (numberOfRowsUpdate == 0) {
+            throw new NotFoundException("Not found the film");
+        }
+    }
+
+    @Override
+    public Film update (Film film) {
         String sqlQueryForDeleteById = "DELETE FROM genre_films WHERE film_id = ?";
         String sqlQueryToAddFilmIdAndGenreId = "INSERT INTO genre_films (film_id, genre_id) VALUES (?, ?)";
 
-        if (jdbcTemplate.update(sqlQueryForUpdateFilm, film.getName(), film.getDescription(), film.getReleaseDate()
-                , film.getDuration(), film.getMpa().getId(), film.getId()) == 0) {
-            throw new NotFoundException("Not found the film");
-        }
         if (film.getGenres().size() == 0) {
             jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
         }
