@@ -19,8 +19,4 @@ public interface FilmStorage {
     Film getFilm (Integer id);
 
     boolean containsFilm(Integer id);
-
-    boolean containsFilm(Film film);
-
-    boolean containsUser(Integer id);
 }

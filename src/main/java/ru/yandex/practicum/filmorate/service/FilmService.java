@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.validator.FilmValidator;
 
 import java.util.Comparator;
@@ -16,12 +17,14 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
     private final FilmValidator filmValidator;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, FilmValidator filmValidator) {
+    public FilmService(FilmStorage filmStorage, FilmValidator filmValidator, UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.filmValidator = filmValidator;
+        this.userStorage = userStorage;
     }
 
     public Film addFilm(Film film) {
@@ -45,7 +48,7 @@ public class FilmService {
     }
 
     public void addLike(Integer userId, Integer filmId) {
-        if (!filmStorage.containsUser(userId)) {
+        if (!userStorage.containsUser(userId)) {
             throw new NotFoundException("Unable to like from a user that doesn't exist");
         }
         if (!filmStorage.containsFilm(filmId)) {
@@ -55,7 +58,7 @@ public class FilmService {
     }
 
     public void deleteLike(Integer userId, Integer filmId) {
-        if (!filmStorage.containsUser(userId)) {
+        if (!userStorage.containsUser(userId)) {
             throw new NotFoundException("Unable to remove a like from a user that doesn't exist");
         }
         if (!filmStorage.containsFilm(filmId)) {

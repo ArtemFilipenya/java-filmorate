@@ -148,38 +148,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public boolean containsFilm(Integer id) {
-        String sqlQueryToFindFilmById = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
-                "WHERE f.film_id = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQueryToFindFilmById, this::makeFilm, id);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean containsFilm(Film film) {
-        String sqlQueryToFindFilm = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
-                "WHERE f.name = ? AND  f.description = ? AND f.release_date = ? AND f.duration = ? AND f.mpa = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQueryToFindFilm, this::makeFilm, film.getName(), film.getDescription(),
-                    film.getReleaseDate(), film.getDuration(), film.getMpa().getId());
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
-    }
-
-    @Override
-    public boolean containsUser(Integer id) {
-        String sqlQuery = "SELECT * FROM person WHERE person_id = ?";
-        try {
-            jdbcTemplate.queryForObject(sqlQuery, this::makeUser, id);
-            return true;
-        } catch (EmptyResultDataAccessException e) {
-            return false;
-        }
+        return jdbcTemplate.queryForObject("SELECT COUNT(1) FROM films WHERE id = ?", Long.class, id) == 1;
     }
 
     private Film makeFilm(ResultSet resultSet, int rowSum) throws SQLException {
