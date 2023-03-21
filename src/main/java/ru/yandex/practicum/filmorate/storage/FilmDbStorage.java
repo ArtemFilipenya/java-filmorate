@@ -76,19 +76,22 @@ public class FilmDbStorage implements FilmStorage {
         }
         if (film.getGenres() != null && film.getGenres().size() != 0) {
             jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
-            film.getGenres().forEach(genre -> jdbcTemplate.batchUpdate(sqlQueryToAddFilmIdAndGenreId,
-                    new BatchPreparedStatementSetter() {
+            List<Integer> genreIds = new ArrayList<>();
+            for (Genre genre : film.getGenres()) {
+                genreIds.add(genre.getId());
+            }
+            jdbcTemplate.batchUpdate(sqlQueryToAddFilmIdAndGenreId, new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
                     ps.setInt(1, film.getId());
-                    ps.setInt(2, genre.getId());
+                    ps.setInt(2, genreIds.get(i));
                 }
 
                 @Override
                 public int getBatchSize() {
-                    return 1;
+                    return genreIds.size();
                 }
-            }));
+            });
         }
         return getFilm(film.getId());
     }
@@ -102,30 +105,17 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(Integer id) {
         String sqlQueryToGetFilmById = "SELECT film_id, name, description, release_date, duration, film.mpa, mpa.mpa_name " +
                 "FROM film JOIN MPA ON film.mpa = mpa.mpa_id WHERE film.film_id = ?";
-        Film film;
         try {
-            film = jdbcTemplate.queryForObject(sqlQueryToGetFilmById, this::makeFilm, id);
+            return jdbcTemplate.queryForObject(sqlQueryToGetFilmById, this::makeFilm, id);
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("There is no movie with this id");
         }
-        return film;
     }
 
     @Override
     public void addLike(Integer userId, Integer filmId) {
         String sqlQueryToLikeFilm = "MERGE INTO likes (person_id, film_id) VALUES (?, ?)";
-        jdbcTemplate.batchUpdate(sqlQueryToLikeFilm, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, userId);
-                ps.setInt(2, filmId);
-            }
-
-            @Override
-            public int getBatchSize() {
-                return 1;
-            }
-        });
+        jdbcTemplate.update(sqlQueryToLikeFilm, userId, filmId);
     }
 
     @Override
