@@ -53,7 +53,6 @@ public class FilmDbStorage implements FilmStorage {
                 return genreIds.size();
             }
         });
-
     }
 
     @Override
@@ -68,17 +67,7 @@ public class FilmDbStorage implements FilmStorage {
             throw new NotFoundException("Not found the film");
         }
         if (film.getGenres().size() == 0) {
-            jdbcTemplate.batchUpdate(sqlQueryForDeleteById, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    ps.setInt(1, film.getId());
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return 1;
-                }
-            });
+            jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
         }
         if (film.getGenres() != null && film.getGenres().size() != 0) {
             jdbcTemplate.update(sqlQueryForDeleteById, film.getId());
@@ -141,14 +130,19 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteLike(Integer userId, Integer filmId) {
         String sqlQueryToDeleteLikeFromFilm = "DELETE FROM likes where person_id = ? AND film_id = ?";
-        if (jdbcTemplate.update(sqlQueryToDeleteLikeFromFilm, userId, filmId) == 0) {
-            throw new NotFoundException("Movie has no like");
-        }
+        jdbcTemplate.update(sqlQueryToDeleteLikeFromFilm, userId, filmId);
     }
 
     @Override
     public boolean containsFilm(Integer id) {
-        return jdbcTemplate.queryForObject("SELECT COUNT(1) FROM films WHERE id = ?", Long.class, id) == 1;
+        String sqlQueryToFindFilmById = "SELECT f.*, mpa.mpa_name FROM FILM AS f JOIN mpa ON f.mpa = mpa.mpa_id " +
+                "WHERE f.film_id = ?";
+        try {
+            jdbcTemplate.queryForObject(sqlQueryToFindFilmById, this::makeFilm, id);
+            return true;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     private Film makeFilm(ResultSet resultSet, int rowSum) throws SQLException {
